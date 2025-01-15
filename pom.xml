@@ -19,6 +19,11 @@
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -28,6 +33,12 @@
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/spigot.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.zyypj</groupId>
+            <artifactId>booter</artifactId>
+            <version>0.5</version>
         </dependency>
 
         <dependency>
