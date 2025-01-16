@@ -1,8 +1,8 @@
 package com.github.zyypj.tadeuBooter.minecraft.packet.utils;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
@@ -24,8 +24,8 @@ public class VirtualEntity {
     private final int entityId;
     private final UUID entityUUID;
     private final EntityType entityType;
-    private Location location;
     private final Map<String, Object> metadata = new HashMap<>();
+    private Location location;
     private boolean isVisible = true;
 
     public VirtualEntity(EntityType entityType, Location spawnLocation) {
@@ -39,11 +39,6 @@ public class VirtualEntity {
         return isVisible;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-        updateLocationForAll();
-    }
-
     public void setVisible(boolean visible) {
         this.isVisible = visible;
         if (visible) {
@@ -51,6 +46,11 @@ public class VirtualEntity {
         } else {
             destroyForAll();
         }
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+        updateLocationForAll();
     }
 
     public void setMetadata(String key, Object value) {

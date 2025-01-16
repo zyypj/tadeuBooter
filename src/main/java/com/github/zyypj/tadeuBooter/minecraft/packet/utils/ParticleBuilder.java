@@ -1,8 +1,8 @@
 package com.github.zyypj.tadeuBooter.minecraft.packet.utils;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -31,14 +31,14 @@ public class ParticleBuilder {
     /**
      * Exibe uma partícula para um jogador em uma localização específica.
      *
-     * @param player    O jogador que verá a partícula.
-     * @param particle  O tipo da partícula (ex.: "flame", "cloud").
-     * @param location  A localização onde a partícula será exibida.
-     * @param count     A quantidade de partículas exibidas.
-     * @param offsetX   O deslocamento no eixo X.
-     * @param offsetY   O deslocamento no eixo Y.
-     * @param offsetZ   O deslocamento no eixo Z.
-     * @param speed     A velocidade das partículas.
+     * @param player   O jogador que verá a partícula.
+     * @param particle O tipo da partícula (ex.: "flame", "cloud").
+     * @param location A localização onde a partícula será exibida.
+     * @param count    A quantidade de partículas exibidas.
+     * @param offsetX  O deslocamento no eixo X.
+     * @param offsetY  O deslocamento no eixo Y.
+     * @param offsetZ  O deslocamento no eixo Z.
+     * @param speed    A velocidade das partículas.
      */
     public static void displayParticle(Player player, String particle, Location location, int count, float offsetX, float offsetY, float offsetZ, float speed) {
         try {
@@ -88,8 +88,8 @@ public class ParticleBuilder {
      */
     public static void startAnimation(Location location, double duration, Consumer<Location> frameLogic) {
         new BukkitRunnable() {
-            double time = 0;
             final double interval = 0.1;
+            double time = 0;
 
             @Override
             public void run() {

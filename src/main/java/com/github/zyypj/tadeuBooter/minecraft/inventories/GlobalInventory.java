@@ -21,10 +21,10 @@ public class GlobalInventory {
     private static final Map<String, GlobalInventory> activeInventories = new ConcurrentHashMap<>();
 
     private final String id;
-    private String title;
     private final int size;
-    private Inventory inventory;
     private final Map<Integer, Consumer<InventoryClickEvent>> clickActions = new HashMap<>();
+    private String title;
+    private Inventory inventory;
     private double updateInterval = -1;
 
     public GlobalInventory(String id, String title, int size) {
@@ -33,6 +33,10 @@ public class GlobalInventory {
         this.size = size;
         this.inventory = Bukkit.createInventory(null, size, this.title);
         activeInventories.put(id, this);
+    }
+
+    private static String translateColors(String text) {
+        return ChatColor.translateAlternateColorCodes('&', text);
     }
 
     public GlobalInventory setTitle(String title) {
@@ -99,9 +103,5 @@ public class GlobalInventory {
                 action.accept(event);
             }
         }
-    }
-
-    private static String translateColors(String text) {
-        return ChatColor.translateAlternateColorCodes('&', text);
     }
 }

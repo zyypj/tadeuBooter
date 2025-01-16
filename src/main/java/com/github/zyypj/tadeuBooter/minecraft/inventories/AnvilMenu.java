@@ -1,5 +1,6 @@
 package com.github.zyypj.tadeuBooter.minecraft.inventories;
 
+import lombok.Getter;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.ChatMessage;
 import net.minecraft.server.v1_8_R3.ContainerAnvil;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class AnvilMenu {
 
     private Player player;
@@ -68,13 +70,10 @@ public class AnvilMenu {
         this.inv = null;
     }
 
-    public Player getPlayer() {
-        return this.player;
-    }
-
     /**
      * Enumeração dos slots da bigorna.
      */
+    @Getter
     public enum AnvilSlot {
         INPUT_LEFT(0),
         INPUT_RIGHT(1),
@@ -84,10 +83,6 @@ public class AnvilMenu {
 
         AnvilSlot(int slot) {
             this.slot = slot;
-        }
-
-        public int getSlot() {
-            return this.slot;
         }
 
         public static AnvilSlot bySlot(int slot) {
@@ -110,7 +105,8 @@ public class AnvilMenu {
     /**
      * Classe representando o evento de clique na bigorna.
      */
-    public class AnvilClickEvent {
+    @Getter
+    public static class AnvilClickEvent {
         private final AnvilSlot slot;
         private final String name;
         private boolean close = true;
@@ -119,14 +115,6 @@ public class AnvilMenu {
         public AnvilClickEvent(AnvilSlot slot, String name) {
             this.slot = slot;
             this.name = name;
-        }
-
-        public AnvilSlot getSlot() {
-            return this.slot;
-        }
-
-        public String getName() {
-            return this.name;
         }
 
         public boolean getWillClose() {
@@ -149,7 +137,7 @@ public class AnvilMenu {
     /**
      * Container customizado para simular a bigorna.
      */
-    private class AnvilContainer extends ContainerAnvil {
+    private static class AnvilContainer extends ContainerAnvil {
         public AnvilContainer(EntityHuman entity) {
             super(entity.inventory, entity.world, new BlockPosition(0, 0, 0), entity);
         }
@@ -187,7 +175,7 @@ public class AnvilMenu {
                     }
                 }
 
-                AnvilClickEvent clickEvent = menu.new AnvilClickEvent(AnvilSlot.bySlot(slot), name);
+                AnvilClickEvent clickEvent = new AnvilClickEvent(AnvilSlot.bySlot(slot), name);
                 handler.onAnvilClick(clickEvent);
 
                 if (clickEvent.getWillClose()) {
