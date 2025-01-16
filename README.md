@@ -94,3 +94,5 @@ Contribuições são bem-vindas! Se você encontrar problemas ou tiver ideias pa
 
 - [JitPack - TadeuBooter](https://jitpack.io/#zyypj/tadeuBooter/v0.5)
 - [Repositório no GitHub](https://github.com/zyypj/tadeuBooter)
+
+# Lembrando que tadeu sou eu :D
