@@ -34,7 +34,7 @@ Em seguida, adicione a dependência:
 <dependency>
     <groupId>com.github.zyypj</groupId>
     <artifactId>tadeuBooter</artifactId>
-    <version>v0.5</version>
+    <version>1.0</version>
 </dependency>
 ```
 
@@ -52,7 +52,7 @@ Adicione a dependência no bloco `dependencies`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.zyypj:tadeuBooter:v0.5'
+    implementation 'com.github.zyypj:tadeuBooter:1.0'
 }
 ```
 
