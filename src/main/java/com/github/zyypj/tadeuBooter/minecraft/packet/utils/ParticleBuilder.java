@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -103,6 +104,16 @@ public class ParticleBuilder {
         }.runTaskTimer(Bukkit.getPluginManager().getPlugins()[0], 0L, 2L);
     }
 
+    /**
+     * Exibe uma explosão de partículas em uma localização específica e toca um som de explosão.
+     *
+     * @param location A localização da explosão.
+     */
+    public static void displayExplosion(Location location) {
+        displayParticle("explosion_large", location, 1, 0.5f, 0.5f, 0.5f, 0.1f);
+        displayParticle("explosion_normal", location, 20, 0.5f, 0.5f, 0.5f, 0.2f);
+        location.getWorld().playSound(location, Sound.EXPLODE, 1.0f, 1.0f);
+    }
     /**
      * Animações de partículas pré-definidas.
      */

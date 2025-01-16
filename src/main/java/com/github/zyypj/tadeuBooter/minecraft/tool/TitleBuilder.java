@@ -14,6 +14,14 @@ public class TitleBuilder {
     private static Class<?> nmsChatSerializer;
     private static Class<?> chatBaseComponent;
 
+    static {
+        try {
+            loadClasses();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private String title = "";
     private ChatColor titleColor = ChatColor.WHITE;
     private String subtitle = "";
@@ -23,15 +31,8 @@ public class TitleBuilder {
     private int fadeOutTime = -1;
     private boolean ticks = false;
 
-    static {
-        try {
-            loadClasses();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public TitleBuilder() {
     }
-
-    public TitleBuilder() {}
 
     public TitleBuilder(String title) {
         this.title = title;

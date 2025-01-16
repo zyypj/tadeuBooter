@@ -6,7 +6,7 @@
 
     <groupId>com.github.zyypj</groupId>
     <artifactId>tadeuBooter</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.5</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -42,7 +42,7 @@
             <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${basedir}/libs/spigot188.jar</systemPath>
+            <systemPath>${basedir}/libs/spigot.jar</systemPath>
         </dependency>
 
         <dependency>

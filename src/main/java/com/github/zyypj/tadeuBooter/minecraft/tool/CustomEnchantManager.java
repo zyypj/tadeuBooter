@@ -92,8 +92,8 @@ public class CustomEnchantManager {
     /**
      * Aplica múltiplos encantamentos customizados a um item.
      *
-     * @param item        O item que receberá os encantamentos.
-     * @param enchants    Mapeamento de nomes de encantamentos para seus níveis.
+     * @param item     O item que receberá os encantamentos.
+     * @param enchants Mapeamento de nomes de encantamentos para seus níveis.
      * @return O item atualizado.
      */
     public static ItemStack applyMultipleCustomEnchants(ItemStack item, List<CustomEnchant> enchants) {

@@ -12,6 +12,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Classe abstrata que gerencia a interação entre o cache e o banco de dados.
+ * Oferece métodos para busca, armazenamento em cache, salvamento e gerenciamento de listeners.
+ *
+ * @param <K> O tipo da chave usada para identificar valores no cache e no banco de dados.
+ * @param <V> O tipo dos valores gerenciados pelo cache e DAO.
+ * @param <C> O tipo do cache usado pelo controlador.
+ * @param <D> O tipo do DAO usado pelo controlador.
+ */
 @Data
 public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K, V>> {
 
@@ -22,12 +31,25 @@ public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K
     private final @NonNull Logger logger;
     private final @NonNull Set<ControllerListener> listeners = new HashSet<>();
 
+    /**
+     * Construtor que inicializa o controlador com o cache e DAO fornecidos.
+     *
+     * @param cache O cache para gerenciamento de dados em memória.
+     * @param dao   O DAO para operações no banco de dados.
+     */
     public Controller(@NonNull C cache, @NonNull D dao) {
         this.cache = cache;
         this.dao = dao;
         this.logger = Logger.getLogger(getClass().getSimpleName());
     }
 
+    /**
+     * Construtor que inicializa o controlador com o cache, DAO e logger fornecidos.
+     *
+     * @param cache  O cache para gerenciamento de dados em memória.
+     * @param dao    O DAO para operações no banco de dados.
+     * @param logger O logger para registrar eventos e erros.
+     */
     public Controller(@NonNull C cache, @NonNull D dao, @NonNull Logger logger) {
         this.cache = cache;
         this.dao = dao;
@@ -35,9 +57,10 @@ public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K
     }
 
     /**
-     * <p>Gets the value from the cache and if it's not present there, gets it from the database.</p>
-     * @param key the key
-     * @return a {@link CompletableFuture} that will be completed with the value
+     * Busca um valor no cache e, se não estiver presente, busca no banco de dados.
+     *
+     * @param key A chave usada para identificar o valor.
+     * @return Um {@link CompletableFuture} que será completado com o valor buscado.
      */
     public CompletableFuture<V> get(@NonNull K key) {
         return cache.get(key)
@@ -55,19 +78,27 @@ public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K
                 }));
     }
 
+    /**
+     * Método chamado quando ocorre um erro ao buscar um valor.
+     *
+     * @param key       A chave usada para identificar o valor.
+     * @param throwable A exceção lançada durante a operação.
+     */
     protected void onGetError(@NonNull K key, @NonNull Throwable throwable) {
         getLogger().log(Level.SEVERE, "Error while getting the value with the key " + key, throwable);
     }
 
     /**
-     * <p>Caches the value in the {@link #getCache()}.</p>
-     * @param value the value
+     * Armazena o valor no cache.
+     *
+     * @param value O valor a ser armazenado.
      */
     public abstract void cache(@NonNull V value);
 
     /**
-     * <p>Caches all the given values in the {@link #getCache()}</p>
-     * @param values the values
+     * Armazena múltiplos valores no cache.
+     *
+     * @param values Os valores a serem armazenados.
      */
     public void cacheAll(@NonNull Iterable<V> values) {
         for (V value : values)
@@ -75,21 +106,20 @@ public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K
     }
 
     /**
-     * <p>
-     *     Called when {@code this} {@link Controller} shutdowns.
-     *     The default implementation calls the {@link #save()} method and waits for the {@link CompletableFuture} to complete.
-     * </p>
-     * @apiNote this method is not called natively by WLib, you need to call it manually
+     * Método chamado quando o controlador é desligado.
+     * A implementação padrão chama o método {@link #save()} e espera a conclusão do {@link CompletableFuture}.
+     *
+     * @apiNote Este método não é chamado automaticamente, deve ser invocado manualmente.
      */
     public void shutdown() {
         save().join();
     }
 
     /**
-     * <p>
-     *     Called when {@code this} {@link Controller} is requested to save all the data.
-     *     The Spigot implementation of WLib will call this method every 5 minutes.
-     * </p>
+     * Método chamado para salvar todos os dados no banco de dados.
+     * Implementações específicas podem chamar este método periodicamente.
+     *
+     * @return Um {@link CompletableFuture} indicando a conclusão do salvamento.
      */
     public CompletableFuture<Void> save() {
         return CompletableFuture.allOf(cache.getAll().stream().map(dao::update).toArray(CompletableFuture[]::new));
@@ -100,10 +130,20 @@ public abstract class Controller<K, V, C extends Cache<K, V, ?>, D extends DAO<K
         return Controller.class.hashCode();
     }
 
+    /**
+     * Adiciona um listener para monitorar eventos do controlador.
+     *
+     * @param listener O listener a ser adicionado.
+     */
     public void addListener(@NonNull ControllerListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Remove um listener do controlador.
+     *
+     * @param listener O listener a ser removido.
+     */
     public void removeListener(@NonNull ControllerListener listener) {
         listeners.remove(listener);
     }

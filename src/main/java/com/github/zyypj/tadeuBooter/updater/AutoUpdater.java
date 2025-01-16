@@ -2,7 +2,10 @@ package com.github.zyypj.tadeuBooter.updater;
 
 import com.github.zyypj.tadeuBooter.http.Request;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Logger;
 
@@ -15,11 +18,11 @@ public class AutoUpdater {
     private final Logger logger;
 
     /**
-     * @param currentVersion   A versão atual do plugin.
-     * @param updateCheckUrl   A URL para verificar a versão mais recente.
-     * @param downloadUrl      A URL para baixar o novo arquivo.
-     * @param pluginFile       O arquivo atual do plugin (JAR).
-     * @param logger           O logger para saída de logs.
+     * @param currentVersion A versão atual do plugin.
+     * @param updateCheckUrl A URL para verificar a versão mais recente.
+     * @param downloadUrl    A URL para baixar o novo arquivo.
+     * @param pluginFile     O arquivo atual do plugin (JAR).
+     * @param logger         O logger para saída de logs.
      */
     public AutoUpdater(String currentVersion, String updateCheckUrl, String downloadUrl, File pluginFile, Logger logger) {
         this.currentVersion = currentVersion;

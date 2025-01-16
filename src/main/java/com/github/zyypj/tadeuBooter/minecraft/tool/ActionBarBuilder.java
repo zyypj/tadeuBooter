@@ -1,8 +1,8 @@
 package com.github.zyypj.tadeuBooter.minecraft.tool;
 
+import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public class ActionBarBuilder {
      * Envia uma mensagem de Action Bar para um único jogador.
      *
      * @param content A mensagem a ser enviada (suporta cores com &).
-     * @param viewer O jogador que receberá a mensagem.
+     * @param viewer  O jogador que receberá a mensagem.
      */
     public void sendActionBar(String content, Player viewer) {
         try {

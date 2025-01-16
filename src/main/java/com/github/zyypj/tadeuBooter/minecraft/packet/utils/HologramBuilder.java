@@ -7,6 +7,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Registry;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -107,7 +108,7 @@ public class HologramBuilder {
             double lineSpacing = 0.25;
 
             for (String line : lines) {
-                int entityId = createEntity(lineLocation, line);
+                int entityId = createEntity(lineLocation, ChatColor.translateAlternateColorCodes('&', line));
                 entityIds.add(entityId);
                 lineLocation.subtract(0, lineSpacing, 0);
             }
@@ -134,7 +135,7 @@ public class HologramBuilder {
             double lineSpacing = 0.25;
 
             for (int i = 0; i < lines.size(); i++) {
-                sendSpawnPacket(player, entityIds.get(i), lineLocation, lines.get(i));
+                sendSpawnPacket(player, entityIds.get(i), lineLocation, ChatColor.translateAlternateColorCodes('&', lines.get(i)));
                 lineLocation.subtract(0, lineSpacing, 0);
             }
         }

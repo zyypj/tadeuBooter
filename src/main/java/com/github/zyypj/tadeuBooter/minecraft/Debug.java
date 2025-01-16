@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Debug {
 
     private static JavaPlugin plugin;
-    private static String prefix = "§8[Debug] §f";
+    private static String prefix = "§8§l[DEBUG] §f";
 
     /**
      * Define o JavaPlugin usado pelo sistema de debug.

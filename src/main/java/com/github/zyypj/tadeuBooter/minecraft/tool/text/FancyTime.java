@@ -19,14 +19,12 @@ import java.util.regex.Pattern;
 public class FancyTime implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    // Padrão para parsing de strings como "2d 4h 15m 30s"
+    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+)([dhms])");
     private final int days;
     private final int hours;
     private final int minutes;
     private final int seconds;
-
-    // Padrão para parsing de strings como "2d 4h 15m 30s"
-    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+)([dhms])");
 
     /**
      * Construtor principal.

@@ -1,10 +1,11 @@
 package com.github.zyypj.tadeuBooter.minecraft.tool;
 
+import org.bukkit.entity.Player;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.bukkit.entity.Player;
 
 /**
  * Controlador de Cooldowns para jogadores no Bukkit.
@@ -12,8 +13,27 @@ import org.bukkit.entity.Player;
  */
 public class CooldownController {
 
-    private final HashMap<String, Long> cooldowns = new HashMap<>();
     private static final Map<UUID, CooldownController> CONTROLLER = new HashMap<>();
+    private final HashMap<String, Long> cooldowns = new HashMap<>();
+
+    /**
+     * Remove o controlador de cooldowns associado a um jogador.
+     *
+     * @param player O jogador cujo controlador será removido.
+     */
+    public static void removeCooldownController(Player player) {
+        CONTROLLER.remove(player.getUniqueId());
+    }
+
+    /**
+     * Obtém o controlador de cooldowns de um jogador.
+     *
+     * @param player O jogador para o qual o controlador será retornado.
+     * @return O controlador de cooldowns do jogador.
+     */
+    public static CooldownController getCooldownController(Player player) {
+        return CONTROLLER.computeIfAbsent(player.getUniqueId(), uuid -> new CooldownController());
+    }
 
     /**
      * Cria um cooldown associado a uma chave.
@@ -52,24 +72,5 @@ public class CooldownController {
      */
     public boolean isInCooldown(String key) {
         return this.getCooldown(key) > 0;
-    }
-
-    /**
-     * Remove o controlador de cooldowns associado a um jogador.
-     *
-     * @param player O jogador cujo controlador será removido.
-     */
-    public static void removeCooldownController(Player player) {
-        CONTROLLER.remove(player.getUniqueId());
-    }
-
-    /**
-     * Obtém o controlador de cooldowns de um jogador.
-     *
-     * @param player O jogador para o qual o controlador será retornado.
-     * @return O controlador de cooldowns do jogador.
-     */
-    public static CooldownController getCooldownController(Player player) {
-        return CONTROLLER.computeIfAbsent(player.getUniqueId(), uuid -> new CooldownController());
     }
 }

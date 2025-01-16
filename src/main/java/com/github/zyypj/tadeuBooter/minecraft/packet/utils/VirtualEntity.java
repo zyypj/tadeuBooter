@@ -28,6 +28,12 @@ public class VirtualEntity {
     private Location location;
     private boolean isVisible = true;
 
+    /**
+     * Construtor da entidade virtual.
+     *
+     * @param entityType    Tipo da entidade (ex.: ZOMBIE, ARMOR_STAND).
+     * @param spawnLocation Localização inicial onde a entidade será criada.
+     */
     public VirtualEntity(EntityType entityType, Location spawnLocation) {
         this.entityId = random.nextInt(1_000_000);
         this.entityUUID = UUID.randomUUID();
@@ -35,10 +41,20 @@ public class VirtualEntity {
         this.location = spawnLocation;
     }
 
+    /**
+     * Retorna se a entidade está visível.
+     *
+     * @return true se visível, false caso contrário.
+     */
     public boolean isVisible() {
         return isVisible;
     }
 
+    /**
+     * Define a visibilidade da entidade.
+     *
+     * @param visible true para tornar visível, false para ocultar.
+     */
     public void setVisible(boolean visible) {
         this.isVisible = visible;
         if (visible) {
@@ -48,20 +64,42 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Atualiza a localização da entidade.
+     *
+     * @param location Nova localização da entidade.
+     */
     public void setLocation(Location location) {
         this.location = location;
         updateLocationForAll();
     }
 
+    /**
+     * Define um metadado para a entidade.
+     *
+     * @param key   Chave do metadado.
+     * @param value Valor do metadado.
+     */
     public void setMetadata(String key, Object value) {
         metadata.put(key, value);
         updateMetadataForAll();
     }
 
+    /**
+     * Retorna o valor de um metadado associado à chave especificada.
+     *
+     * @param key Chave do metadado.
+     * @return Valor do metadado ou null se não existir.
+     */
     public Object getMetadata(String key) {
         return metadata.get(key);
     }
 
+    /**
+     * Spawna a entidade para um jogador específico.
+     *
+     * @param player Jogador para o qual a entidade será visível.
+     */
     public void spawn(Player player) {
         try {
             PacketContainer spawnPacket = protocolManager.createPacket(PacketType.Play.Server.SPAWN_ENTITY_LIVING);
@@ -81,6 +119,11 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Remove a entidade para um jogador específico.
+     *
+     * @param player Jogador para o qual a entidade será removida.
+     */
     public void destroy(Player player) {
         try {
             PacketContainer destroyPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_DESTROY);
@@ -92,6 +135,11 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Atualiza a localização da entidade para um jogador específico.
+     *
+     * @param player Jogador para o qual a localização será atualizada.
+     */
     public void updateLocation(Player player) {
         try {
             PacketContainer teleportPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_TELEPORT);
@@ -110,6 +158,11 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Atualiza os metadados da entidade para um jogador específico.
+     *
+     * @param player Jogador para o qual os metadados serão atualizados.
+     */
     public void updateMetadata(Player player) {
         try {
             PacketContainer metadataPacket = protocolManager.createPacket(PacketType.Play.Server.ENTITY_METADATA);
@@ -137,30 +190,48 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Spawna a entidade para todos os jogadores online.
+     */
     public void spawnForAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             spawn(player);
         }
     }
 
+    /**
+     * Remove a entidade para todos os jogadores online.
+     */
     public void destroyForAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             destroy(player);
         }
     }
 
+    /**
+     * Atualiza a localização da entidade para todos os jogadores online.
+     */
     public void updateLocationForAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             updateLocation(player);
         }
     }
 
+    /**
+     * Atualiza os metadados da entidade para todos os jogadores online.
+     */
     public void updateMetadataForAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             updateMetadata(player);
         }
     }
 
+    /**
+     * Envia uma animação da entidade para um jogador específico.
+     *
+     * @param player        Jogador que verá a animação.
+     * @param animationType Tipo da animação (ex.: 0 para swing braço, 1 para dano).
+     */
     public void animate(Player player, int animationType) {
         try {
             PacketContainer animationPacket = protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
@@ -173,6 +244,11 @@ public class VirtualEntity {
         }
     }
 
+    /**
+     * Envia uma animação da entidade para todos os jogadores online.
+     *
+     * @param animationType Tipo da animação (ex.: 0 para swing braço, 1 para dano).
+     */
     public void animateForAll(int animationType) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             animate(player, animationType);

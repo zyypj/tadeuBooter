@@ -1,13 +1,14 @@
 package com.github.zyypj.tadeuBooter.minecraft.tool.location;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 public class Cuboid {
     private final int xMin;
@@ -43,9 +44,9 @@ public class Cuboid {
     public Iterator<Block> blockList() {
         List<Block> bL = new ArrayList<>(this.getTotalBlockSize());
 
-        for(int x = this.xMin; x <= this.xMax; ++x) {
-            for(int y = this.yMin; y <= this.yMax; ++y) {
-                for(int z = this.zMin; z <= this.zMax; ++z) {
+        for (int x = this.xMin; x <= this.xMax; ++x) {
+            for (int y = this.yMin; y <= this.yMax; ++y) {
+                for (int z = this.zMin; z <= this.zMax; ++z) {
                     Block b = this.world.getBlockAt(x, y, z);
                     bL.add(b);
                 }

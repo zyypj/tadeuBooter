@@ -1,9 +1,5 @@
 package com.github.zyypj.tadeuBooter.minecraft.serialization;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.github.zyypj.tadeuBooter.Constants;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -15,6 +11,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Classe para serializar e desserializar inventários do Bukkit, incluindo tipos de inventário
@@ -31,7 +31,7 @@ public class Serializer {
      * Serializa um inventário Bukkit em uma string JSON.
      *
      * @param inventoryType O tipo de inventário.
-     * @param inventory      O inventário a ser serializado.
+     * @param inventory     O inventário a ser serializado.
      * @return Uma string JSON representando o inventário.
      */
     public String serializeInventory(InventoryType inventoryType, Inventory inventory) {
@@ -48,7 +48,8 @@ public class Serializer {
                 itemData.put("durability", stack.getDurability());
 
                 if (stack.hasItemMeta()) {
-                    itemData.put("meta", this.gson.toJson(stack.getItemMeta(), new TypeToken<ItemMeta>() {}.getType()));
+                    itemData.put("meta", this.gson.toJson(stack.getItemMeta(), new TypeToken<ItemMeta>() {
+                    }.getType()));
                 }
 
                 if (stack.getData() != null) {

@@ -11,6 +11,12 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Classe abstrata que representa a base para operações com um banco de dados.
+ * Oferece métodos para abrir, fechar, atualizar, consultar e salvar informações.
+ *
+ * @param <M> O modelo de banco de dados que esta classe gerencia.
+ */
 @Data
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Database<M extends DatabaseModel<?>> {
@@ -21,14 +27,31 @@ public abstract class Database<M extends DatabaseModel<?>> {
     protected Connection connection;
     private final @NonNull Logger logger;
 
+    /**
+     * Construtor que inicializa o banco de dados com o modelo, holder e propriedades fornecidos.
+     *
+     * @param model      O modelo de banco de dados.
+     * @param holder     O holder do banco de dados.
+     * @param properties As propriedades da conexão.
+     */
     public Database(@NonNull M model, @NonNull DatabaseHolder<?> holder, @NonNull Properties properties) {
         this(model, holder, properties, holder.getLogger());
     }
 
+    /**
+     * Verifica se a conexão com o banco de dados está fechada.
+     *
+     * @return true se a conexão estiver fechada, caso contrário false.
+     */
     public boolean isClosed() {
         return connection == null;
     }
 
+    /**
+     * Abre uma conexão com o banco de dados e executa um callback opcional após a abertura.
+     *
+     * @param callback Callback opcional a ser executado após abrir a conexão.
+     */
     public void open(Consumer<Database<M>> callback) {
         try {
             if (!isClosed()) return;
@@ -40,14 +63,25 @@ public abstract class Database<M extends DatabaseModel<?>> {
         }
     }
 
+    /**
+     * Abre uma conexão com o banco de dados sem callback.
+     */
     public void open() {
         open(null);
     }
 
+    /**
+     * Fecha a conexão com o banco de dados.
+     */
     public void close() {
         close(null);
     }
 
+    /**
+     * Fecha a conexão com o banco de dados e executa um callback opcional após o fechamento.
+     *
+     * @param callback Callback opcional a ser executado após fechar a conexão.
+     */
     public void close(Consumer<Database<M>> callback) {
         try {
             if (isClosed()) return;
@@ -60,6 +94,13 @@ public abstract class Database<M extends DatabaseModel<?>> {
         }
     }
 
+    /**
+     * Executa uma atualização no banco de dados usando o comando fornecido.
+     *
+     * @param command      O comando SQL a ser executado.
+     * @param replacements Os parâmetros para o comando.
+     * @return A instância atual do banco de dados.
+     */
     public Database<M> update(String command, Object... replacements) {
         try {
             returnUpdate(command, replacements).close();
@@ -69,6 +110,13 @@ public abstract class Database<M extends DatabaseModel<?>> {
         return this;
     }
 
+    /**
+     * Prepara e executa um comando de atualização no banco de dados.
+     *
+     * @param command      O comando SQL a ser executado.
+     * @param replacements Os parâmetros para o comando.
+     * @return Um {@link PreparedStatement} preparado com o comando executado.
+     */
     public PreparedStatement returnUpdate(String command, Object... replacements) {
         if (isClosed()) return null;
         try {
@@ -83,6 +131,13 @@ public abstract class Database<M extends DatabaseModel<?>> {
         return null;
     }
 
+    /**
+     * Executa uma consulta SQL no banco de dados.
+     *
+     * @param query        O comando SQL a ser executado.
+     * @param replacements Os parâmetros para o comando.
+     * @return Um {@link ResultSet} contendo os resultados da consulta.
+     */
     public ResultSet query(String query, Object... replacements) {
         if (isClosed()) return null;
         try {
@@ -96,8 +151,19 @@ public abstract class Database<M extends DatabaseModel<?>> {
         }
     }
 
+    /**
+     * Obtém a URL JDBC específica do banco de dados.
+     *
+     * @return A URL JDBC.
+     */
     public abstract String getJdbcUrl();
 
+    /**
+     * Salva um objeto no banco de dados, determinando se ele deve ser inserido, atualizado ou excluído.
+     *
+     * @param object O objeto a ser salvo.
+     * @param table  A tabela onde o objeto será salvo.
+     */
     public void save(DatabaseStorable object, String table) {
         if (object == null)
             return;
@@ -116,6 +182,12 @@ public abstract class Database<M extends DatabaseModel<?>> {
         insert(object, table);
     }
 
+    /**
+     * Atualiza um objeto no banco de dados.
+     *
+     * @param object O objeto a ser atualizado.
+     * @param table  A tabela onde o objeto será atualizado.
+     */
     protected void update(DatabaseStorable object, String table) {
         if (object == null)
             return;
@@ -148,6 +220,12 @@ public abstract class Database<M extends DatabaseModel<?>> {
         update(builder.toString(), list.toArray());
     }
 
+    /**
+     * Exclui um objeto do banco de dados.
+     *
+     * @param object O objeto a ser excluído.
+     * @param table  A tabela onde o objeto será excluído.
+     */
     protected void delete(DatabaseStorable object, String table) {
         if (object == null)
             return;
@@ -169,6 +247,12 @@ public abstract class Database<M extends DatabaseModel<?>> {
         update(builder.toString(), where.values().toArray());
     }
 
+    /**
+     * Insere um objeto no banco de dados.
+     *
+     * @param object O objeto a ser inserido.
+     * @param table  A tabela onde o objeto será inserido.
+     */
     protected void insert(DatabaseStorable object, String table) {
         if (object == null)
             return;
@@ -197,11 +281,23 @@ public abstract class Database<M extends DatabaseModel<?>> {
         update(builder.toString(), data.values().toArray());
     }
 
+    /**
+     * Salva múltiplos objetos no banco de dados em uma tabela específica.
+     *
+     * @param table   A tabela onde os objetos serão salvos.
+     * @param objects Os objetos a serem salvos.
+     */
     public void save(@NonNull String table, @NonNull DatabaseStorable... objects) {
         for (DatabaseStorable object : objects)
             save(object, table);
     }
 
+    /**
+     * Salva múltiplos objetos no banco de dados usando um {@link Iterable}.
+     *
+     * @param objects Os objetos a serem salvos.
+     * @param table   A tabela onde os objetos serão salvos.
+     */
     public void save(@NonNull Iterable<? extends DatabaseStorable> objects, @NonNull String table) {
         for (DatabaseStorable object : objects)
             save(object, table);
