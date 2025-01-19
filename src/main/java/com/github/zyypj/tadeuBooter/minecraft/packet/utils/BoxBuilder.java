@@ -4,10 +4,13 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -79,18 +82,34 @@ public class BoxBuilder {
          * Mostra a caixa para o jogador que a criou.
          */
         public void show() {
-            PacketContainer blockChangePacket = protocolManager.createPacket(PacketType.Play.Server.BLOCK_CHANGE);
-            blockChangePacket.getBlockPositionModifier().write(0, new com.comphenix.protocol.wrappers.BlockPosition(
-                    location.getBlockX(),
-                    location.getBlockY(),
-                    location.getBlockZ()
-            ));
-            blockChangePacket.getBlockData().write(0, WrappedBlockData.createData(material));
+            PacketContainer blockChangePacket = BoxBuilder.protocolManager.createPacket(PacketType.Play.Server.BLOCK_CHANGE);
+            blockChangePacket.getBlockPositionModifier().write(0, new BlockPosition(this.location.getBlockX(), this.location.getBlockY(), this.location.getBlockZ()));
+
+            BlockFace facing = getFacingDirection(this.location, this.owner.getLocation());
+            WrappedBlockData blockData = WrappedBlockData.createData(this.material, facing.ordinal());
+            blockChangePacket.getBlockData().write(0, blockData);
 
             try {
-                protocolManager.sendServerPacket(owner, blockChangePacket);
+                BoxBuilder.protocolManager.sendServerPacket(this.owner, blockChangePacket);
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        private BlockFace getFacingDirection(Location blockLocation, Location playerLocation) {
+            Vector direction = playerLocation.toVector().subtract(blockLocation.toVector());
+            double angle = Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
+            if (angle < 0) {
+                angle += 360;
+            }
+            if (angle >= 315 || angle < 45) {
+                return BlockFace.WEST;
+            } else if (angle < 135) {
+                return BlockFace.NORTH;
+            } else if (angle < 225) {
+                return BlockFace.EAST;
+            } else {
+                return BlockFace.SOUTH;
             }
         }
 
