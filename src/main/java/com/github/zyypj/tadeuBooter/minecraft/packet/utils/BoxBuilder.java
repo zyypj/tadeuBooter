@@ -97,19 +97,20 @@ public class BoxBuilder {
         }
 
         private BlockFace getFacingDirection(Location blockLocation, Location playerLocation) {
-            Vector direction = playerLocation.toVector().subtract(blockLocation.toVector());
-            double angle = Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
+            Vector direction = playerLocation.toVector().subtract(blockLocation.toVector()).normalize();
+            double angle = Math.toDegrees(Math.atan2(direction.getX(), direction.getZ()));
             if (angle < 0) {
                 angle += 360;
             }
-            if (angle >= 315 || angle < 45) {
-                return BlockFace.WEST;
-            } else if (angle < 135) {
-                return BlockFace.NORTH;
-            } else if (angle < 225) {
-                return BlockFace.EAST;
-            } else {
+
+            if (angle >= 45 && angle < 135) {
                 return BlockFace.SOUTH;
+            } else if (angle >= 135 && angle < 225) {
+                return BlockFace.WEST;
+            } else if (angle >= 225 && angle < 315) {
+                return BlockFace.NORTH;
+            } else {
+                return BlockFace.EAST;
             }
         }
 
