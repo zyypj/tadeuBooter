@@ -43,7 +43,7 @@ Adicione a dependência:
 <dependency>
     <groupId>com.github.zyypj</groupId>
     <artifactId>tadeuBooter</artifactId>
-    <version>1.2.5.2</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
@@ -61,7 +61,7 @@ Adicione a dependência no bloco `dependencies`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.zyypj:tadeuBooter:1.2.5.2'
+    implementation 'com.github.zyypj:tadeuBooter:1.3.0'
 }
 ```
 
@@ -88,7 +88,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.zyypj:tadeuBooter:1.2.5.2'
+    implementation 'com.github.zyypj:tadeuBooter:1.3.0'
 }
 
 shadowJar {
