@@ -35,7 +35,7 @@ public class Debug {
      */
     public static void log(String message, boolean debug) {
         if (plugin == null) {
-            throw new IllegalStateException("O plugin não foi definido. Use Debug.setPlugin(JavaPlugin) antes de usar o debug.");
+            throw new IllegalStateException("§4O plugin não foi definido. Use Debug.setPlugin(JavaPlugin) antes de usar o debug. (MANDE ESSE ERRO PARA O DEVELOPER!)");
         }
 
         message = ChatColor.translateAlternateColorCodes('&', message);
@@ -47,6 +47,6 @@ public class Debug {
             return;
         }
 
-        Bukkit.getConsoleSender().sendMessage(prefix + message);
+        Bukkit.getConsoleSender().sendMessage(message);
     }
 }
