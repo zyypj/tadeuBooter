@@ -1,6 +1,6 @@
 package com.github.zyypj.tadeuBooter.minecraft.tool;
 
-import com.comphenix.protocol.PacketType.Play.Server;
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
@@ -25,8 +25,10 @@ public class ActionBarBuilder {
      */
     public void sendActionBar(String content, Player viewer) {
         try {
-            PacketContainer packetContainer = new PacketContainer(Server.SET_ACTION_BAR_TEXT);
+            PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.CHAT);
             packetContainer.getChatComponents().write(0, WrappedChatComponent.fromText(content.replace("&", "§")));
+            packetContainer.getBytes().write(0, (byte) 2); // Indica que a mensagem é um ActionBar na versão 1.8.8
+
             protocolManager.sendServerPacket(viewer, packetContainer);
         } catch (Exception e) {
             e.printStackTrace();
