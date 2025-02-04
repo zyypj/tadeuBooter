@@ -18,6 +18,11 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
+/**
+ * Essa classe foi inspirada numa implementação já existente!
+ *
+ * @author syncwrld (github.com/syncwrld)
+ */
 @Getter
 @RequiredArgsConstructor
 public class Dependencies {

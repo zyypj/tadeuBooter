@@ -18,6 +18,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Essa classe foi inspirada numa implementação já existente!
+ *
+ * @author syncwrld (github.com/syncwrld)
+ */
 @Getter
 @RequiredArgsConstructor
 public class Dependency {
