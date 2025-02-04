@@ -1,0 +1,65 @@
+name: Build e Release do TadeuBooter
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar o JDK 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: maven
+
+      - name: Compilar o projeto com Maven
+        run: mvn clean package -DskipTests
+
+      - name: Executar testes
+        run: mvn test
+
+      - name: Extrair versão do POM
+        id: get_version
+        run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Publicar artefato do JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: tadeuBooter-${{ env.VERSION }}
+          path: target/*.jar
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Baixar o JAR compilado
+        uses: actions/download-artifact@v3
+        with:
+          name: tadeuBooter-${{ env.VERSION }}
+          path: target/
+
+      - name: Criar Release no GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: "v${{ env.VERSION }}"
+          files: target/*.jar
+          body: "Versão ${{ env.VERSION }} do TadeuBooter"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
