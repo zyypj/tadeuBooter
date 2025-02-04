@@ -2,6 +2,8 @@ package com.github.zyypj.tadeuBooter.minecraft.tool;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -13,6 +15,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,18 @@ public class ItemBuilder {
      */
     public ItemBuilder setDisplayName(String displayName) {
         itemMeta.setDisplayName(displayName);
+        return this;
+    }
+
+    /**
+     * Define o nome do item usando um componente Adventure.
+     * O texto será convertido para um formato legível pelo Minecraft.
+     *
+     * @param displayName Componente Adventure representando o nome do item.
+     * @return Instância atual do ItemBuilder.
+     */
+    public ItemBuilder setDisplayName(Component displayName) {
+        itemMeta.setLore(Collections.singletonList(LegacyComponentSerializer.legacySection().serialize(displayName)));
         return this;
     }
 
@@ -97,6 +112,20 @@ public class ItemBuilder {
      */
     public ItemBuilder setLore(List<String> lore) {
         itemMeta.setLore(lore);
+        return this;
+    }
+
+    /**
+     * Define a lore (descrição) do item.
+     *
+     * @param lore Lista de linhas de lore a serem definidas.
+     * @return Instância atual do ItemBuilder.
+     */
+    public ItemBuilder setLore(Component... lore) {
+        List<String> loreList = Arrays.asList(Arrays.stream(lore)
+                .map(LegacyComponentSerializer.legacySection()::serialize)
+                .toArray(String[]::new));
+        itemMeta.setLore(loreList);
         return this;
     }
 
@@ -203,5 +232,9 @@ public class ItemBuilder {
     public ItemStack build() {
         item.setItemMeta(itemMeta);
         return item;
+    }
+
+    public static String serializeComponent(Component component) {
+        return LegacyComponentSerializer.legacySection().serialize(component);
     }
 }
