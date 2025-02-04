@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,10 +35,19 @@ jobs:
 
       - name: Extrair versão do POM
         id: get_version
-        run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "$VERSION" > version.txt
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Salvar versão para o próximo job
+        uses: actions/upload-artifact@v4
+        with:
+          name: version
+          path: version.txt
 
       - name: Publicar artefato do JAR
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tadeuBooter-${{ env.VERSION }}
           path: target/*.jar
@@ -48,8 +60,17 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      - name: Baixar a versão salva
+        uses: actions/download-artifact@v4
+        with:
+          name: version
+          path: .
+
+      - name: Definir variável de versão
+        run: echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
+
       - name: Baixar o JAR compilado
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: tadeuBooter-${{ env.VERSION }}
           path: target/
