@@ -1,4 +1,4 @@
-package com.github.zyypj.tadeuBooter.updater;
+package com.github.zyypj.tadeuBooter.downloaders.updater;
 
 import com.github.zyypj.tadeuBooter.http.Request;
 
