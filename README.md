@@ -1,7 +1,3 @@
-# TadeuBooter
-
-Bem-vindo ao repositório **TadeuBooter**. Este projeto tem como objetivo fornecer um booter para gerenciamento de diversas funções dentro do ambiente Minecraft e suas aplicações.
-
 ## 📖 Documentação
 Para instruções detalhadas sobre como adicionar o **TadeuBooter** ao seu projeto, configurar dependências e realizar o **relocate**, acesse a [wiki oficial](https://github.com/zyypj/tadeuBooter/wiki).
 
