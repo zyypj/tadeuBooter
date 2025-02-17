@@ -2,6 +2,7 @@ package com.github.zyypj.tadeuBooter.minecraft.inventories.editor;
 
 import com.github.zyypj.tadeuBooter.minecraft.inventories.item.InventoryItem;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.item.callback.ItemCallback;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.configuration.border.Border;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 

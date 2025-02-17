@@ -1,10 +1,10 @@
 package com.github.zyypj.tadeuBooter.minecraft.inventories.schedule;
 
-import com.github.zyypj.tadeuBooter.minecraft.inventories.GlobalInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.controller.InventoryController;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.controller.ViewerController;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.CustomInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.configuration.InventoryConfiguration;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.impl.global.GlobalInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.manager.InventoryManager;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.Viewer;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.impl.global.GlobalViewer;

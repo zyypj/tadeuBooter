@@ -1,8 +1,8 @@
 package com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.impl.global;
 
-import com.github.zyypj.tadeuBooter.minecraft.inventories.GlobalInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.editor.InventoryEditor;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.CustomInventory;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.impl.global.GlobalInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.configuration.impl.ViewerConfigurationImpl;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.impl.ViewerImpl;
 import org.bukkit.inventory.Inventory;

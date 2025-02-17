@@ -4,6 +4,8 @@ import com.github.zyypj.tadeuBooter.minecraft.inventories.editor.InventoryEditor
 import com.github.zyypj.tadeuBooter.minecraft.inventories.editor.impl.InventoryEditorImpl;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.CustomInventory;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.Viewer;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.configuration.ViewerConfiguration;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.viewer.property.ViewerPropertyMap;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
