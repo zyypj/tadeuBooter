@@ -4,7 +4,7 @@ import com.github.zyypj.tadeuBooter.minecraft.Debug;
 
 public class DefaultMessages {
 
-    public void sendMessage(Agency agency) {
+    public static void sendMessage(Agency agency) {
         switch (agency) {
             case MRK:
                 Debug.log("&5███    ███ ██████  ██   ██", false);
