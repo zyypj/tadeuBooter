@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -204,5 +205,28 @@ public class ItemBuilder {
     public ItemStack build() {
         item.setItemMeta(itemMeta);
         return item;
+    }
+
+    public static String extractSkullValue(SkullMeta skullMeta) {
+        try {
+            Field profileField = skullMeta.getClass().getDeclaredField("profile");
+            profileField.setAccessible(true);
+            Object profile = profileField.get(skullMeta);
+            if (profile != null) {
+                Method getProperties = profile.getClass().getMethod("getProperties");
+                Object properties = getProperties.invoke(profile);
+                for (Object property : (Iterable<?>) properties) {
+                    Method getNameMethod = property.getClass().getMethod("getName");
+                    String name = (String) getNameMethod.invoke(property);
+                    if ("textures".equals(name)) {
+                        Method getValueMethod = property.getClass().getMethod("getValue");
+                        return (String) getValueMethod.invoke(property);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
