@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public final class InventoryUpdateRunnable implements Runnable {
 
-    private byte second = 0;
+    private double second = 0;
 
     @Override
     public void run() {
@@ -56,13 +56,12 @@ public final class InventoryUpdateRunnable implements Runnable {
     private boolean canUpdate(CustomInventory customInventory) {
         InventoryConfiguration configuration = customInventory.getConfiguration();
 
-        int secondUpdate = configuration.secondUpdate();
-        return secondUpdate > 0 && this.second % secondUpdate == 0;
+        double secondUpdate = configuration.secondUpdate();
+        return secondUpdate > 0 && (this.second / secondUpdate) % 1 == 0;
     }
 
     private void incrementSecond() {
+        second += 0.05;
         if (second >= 60) second = 0;
-        else second++;
     }
-
 }

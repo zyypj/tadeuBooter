@@ -6,8 +6,8 @@ package com.github.zyypj.tadeuBooter.minecraft.inventories.inventory.configurati
  */
 public interface InventoryConfiguration {
 
-    int secondUpdate();
+    double secondUpdate();
 
-    InventoryConfiguration secondUpdate(int secondUpdate);
+    InventoryConfiguration secondUpdate(double secondUpdate);
 
 }

@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 @Data
 public abstract class InventoryConfigurationImpl implements InventoryConfiguration {
 
-    private int secondUpdate;
+    private double secondUpdate;
 
     public static class Simple extends InventoryConfigurationImpl {
     }

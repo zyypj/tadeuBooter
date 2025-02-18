@@ -33,7 +33,7 @@ public final class InventoryManager {
         pluginManager.registerEvents(new CustomInventoryListener(), plugin);
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        scheduler.runTaskTimerAsynchronously(plugin, new InventoryUpdateRunnable(), 0, 20);
+        scheduler.runTaskTimerAsynchronously(plugin, new InventoryUpdateRunnable(), 0, 1);
 
         InventoryManager.enabled = true;
     }
