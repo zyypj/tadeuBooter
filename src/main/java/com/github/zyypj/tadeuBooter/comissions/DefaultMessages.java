@@ -13,8 +13,8 @@ public class DefaultMessages {
                 Debug.log("&5██  ██  ██ ██   ██ ██  ██", false);
                 Debug.log("&5██      ██ ██   ██ ██   ██", false);
                 Debug.log("", false);
+                Debug.log("&f&ldiscord.gg/mrkk - MRK © 2025", false);
                 Debug.log("&fFeito por tadeu @zypj", false);
-                Debug.log("&f&ldiscord.gg/mrkk", false);
                 break;
             case MYSTICCODES:
                 String pluginMessage =
@@ -31,11 +31,22 @@ public class DefaultMessages {
                                 "§d§lPlugin Feito por Tadeu [@zypj]";
                 Debug.log(pluginMessage, false);
                 break;
+            case COMISSIONS:
+                Debug.log("████████╗ █████╗ ██████╗ ███████╗██╗   ██╗", false);
+                Debug.log("╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██║   ██║", false);
+                Debug.log("   ██║   ███████║██║  ██║█████╗  ██║   ██║", false);
+                Debug.log("   ██║   ██╔══██║██║  ██║██╔══╝  ██║   ██║", false);
+                Debug.log("   ██║   ██║  ██║██████╔╝███████╗╚██████╔╝", false);
+                Debug.log("   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝ ╚═════╝", false);
+                Debug.log("&fFeito por tadeu @zypj", false);
+                Debug.log("&f&lgithub.com/zyypj", false);
+                break;
         }
     }
 
     public enum Agency {
         MRK,
-        MYSTICCODES
+        MYSTICCODES,
+        COMISSIONS
     }
 }
