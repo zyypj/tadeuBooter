@@ -1,4 +1,4 @@
-package com.github.zyypj.tadeuBooter.minecraft.object;
+package com.github.zyypj.tadeuBooter.minecraft.objects;
 
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;

@@ -3,7 +3,7 @@ package com.github.zyypj.tadeuBooter.database.controler.player;
 import com.github.zyypj.tadeuBooter.database.controler.Controller;
 import com.github.zyypj.tadeuBooter.database.controler.player.reason.UnloadReason;
 import com.github.zyypj.tadeuBooter.database.dao.DAO;
-import com.github.zyypj.tadeuBooter.minecraft.object.Cache;
+import com.github.zyypj.tadeuBooter.minecraft.objects.Cache;
 import lombok.NonNull;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.github.zyypj.tadeuBooter.minecraft.object;
+package com.github.zyypj.tadeuBooter.minecraft.objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

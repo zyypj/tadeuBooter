@@ -2,7 +2,7 @@ package com.github.zyypj.tadeuBooter.database.controler;
 
 import com.github.zyypj.tadeuBooter.database.controler.listener.ControllerListener;
 import com.github.zyypj.tadeuBooter.database.dao.DAO;
-import com.github.zyypj.tadeuBooter.minecraft.object.Cache;
+import com.github.zyypj.tadeuBooter.minecraft.objects.Cache;
 import lombok.Data;
 import lombok.NonNull;
 
