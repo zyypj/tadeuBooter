@@ -23,4 +23,6 @@ public abstract class InventoryConfigurationImpl implements InventoryConfigurati
     public static class Global extends InventoryConfigurationImpl {
     }
 
+    public static class Anvil extends InventoryConfigurationImpl {
+    }
 }

@@ -2,6 +2,7 @@ package com.github.zyypj.tadeuBooter.minecraft.inventories.manager;
 
 import com.github.zyypj.tadeuBooter.minecraft.inventories.controller.InventoryController;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.controller.ViewerController;
+import com.github.zyypj.tadeuBooter.minecraft.inventories.listener.AnvilInventoryListener;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.listener.CustomInventoryListener;
 import com.github.zyypj.tadeuBooter.minecraft.inventories.schedule.InventoryUpdateRunnable;
 import lombok.AccessLevel;
@@ -31,6 +32,7 @@ public final class InventoryManager {
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new CustomInventoryListener(), plugin);
+        pluginManager.registerEvents(new AnvilInventoryListener(), plugin);
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
         scheduler.runTaskTimerAsynchronously(plugin, new InventoryUpdateRunnable(), 0, 1);
