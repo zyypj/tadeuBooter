@@ -28,61 +28,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Simple Listener class to warn the plugin author (syncwrld) about the usage of the plugin
+ * Simple Listener class to warn the plugin author (tadeu) about the usage of the plugin
  * @author syncwrld
  */
 @Data
 public class SystemsConsultant implements Listener {
 
-    /*
-     * List of nicknames that will have the possibility of trigger the warning
-     */
     private final List<String> nicknames = Arrays.asList("syncwrld", "tadeu", "Mike7581");
-
-    /*
-     * List of allowed ASNs
-     */
-    private final List<String> allowedASNs = Arrays.asList("CLOUDFLARENET", "LaraNet", "Gponnet");
-
-    /*
-     * List of allowed regions
-     */
+    private final List<String> allowedASNs = Arrays.asList("AS53006 ALGAR TELECOM S/A");
     private final List<String> allowedRegions = Arrays.asList("MA", "CE");
-
-    /*
-     * Unique allowed country
-     */
     private final String permittedCountry = "BR";
-
-    /*
-     * Cached networks - to avoid multiple requests to the API
-     */
     private final HashMap<String, Network> cachedNetworks = new HashMap<>();
-
-    /*
-     * Required plugin instance
-     */
     private final JavaPlugin plugin;
-
-    /*
-     * Unknown command message
-     */
     private String unknownCommandMessage = "§cComando desconhecido.";
-
-    /*
-     * Player (me)
-     */
     private Player definedPlayer = null;
-
-    /*
-    Misc/Curiosities:
-     */
     private String bungeecordStatus, netherStatus, endStatus,
             viewDistance, serverVersion, viaStatus;
-
-    /*
-     * List of library plugins - common plugins that are used in the server as a library
-     */
     private final List<String> libraryPlugins = Arrays.asList(
             "Vault", "ViaVersion", "ProtocolLib", "WorldEdit", "WorldGuard",
             "FastAsyncWorldEdit", "PlayerPoints", "mcMMO", "PlotSquared",
@@ -91,16 +52,11 @@ public class SystemsConsultant implements Listener {
             "DecentHolograms", "PacketEvents", "PacketWrapper", "DiscordSRV"
     );
     private final String libraryDisplayFormat = "${statusColor}${name} v${version}\n";
-
-    /*
-     * List of store plugins - plugins that are used in the server bought from a store
-     */
     private final List<String> storePluginsCore = Arrays.asList(
             "yPlugins", "AtlasPlugins", "StormPlugins", "syncBooter",
             "vPlugins", "vCore", "mCore", "kCore", "kPlugins", "LeafPlugins"
     );
     private final String storePluginCoreDisplayFormat = libraryDisplayFormat;
-
     private HashMap<String[], String> serverHosting = new HashMap<String[], String>() {{
         put(new String[] {"Neep Servicos", "Gamers Club"}, "Neep (www.neep.com.br)");
 
