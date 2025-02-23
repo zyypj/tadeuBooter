@@ -2,6 +2,7 @@ package com.github.zyypj.tadeuBooter.minecraft.tool;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -103,27 +104,38 @@ public class ItemBuilder {
     }
 
     /**
-     * Define o dono de uma cabeça (apenas para itens do tipo SKULL_ITEM).
+     * Define o dono de uma cabeça (suporta SKULL_ITEM e PLAYER_HEAD).
      *
      * @param owner Nome do jogador dono da cabeça.
      * @return Instância atual do ItemBuilder.
      */
     public ItemBuilder setSkullOwner(String owner) {
-        if (item.getType() == Material.SKULL_ITEM) {
+        if (item.getType() == Material.SKULL_ITEM || item.getType().name().equals("PLAYER_HEAD")) {
             SkullMeta skullMeta = (SkullMeta) itemMeta;
-            skullMeta.setOwner(owner);
+            if (item.getType() == Material.SKULL_ITEM) {
+                skullMeta.setOwner(owner);
+            } else {
+                try {
+                    Method method = skullMeta.getClass().getMethod("setOwningPlayer", org.bukkit.OfflinePlayer.class);
+                    method.invoke(skullMeta, Bukkit.getOfflinePlayer(owner));
+                } catch (Exception e) {
+                    skullMeta.setOwner(owner);
+                }
+            }
+            this.itemMeta = skullMeta;
         }
         return this;
     }
 
     /**
-     * Define o valor de textura para uma cabeça personalizada.
+     * Define o valor de textura para uma cabeça personalizada (suporta SKULL_ITEM e PLAYER_HEAD).
      *
-     * @param value Valor da textura base64.
+     * @param value Valor da textura em base64.
      * @return Instância atual do ItemBuilder.
      */
     public ItemBuilder setSkullValue(String value) {
-        if (item.getType() == Material.SKULL_ITEM && item.getDurability() == 3) {
+        if ((item.getType() == Material.SKULL_ITEM && item.getDurability() == 3)
+                || item.getType().name().equals("PLAYER_HEAD")) {
             SkullMeta skullMeta = (SkullMeta) itemMeta;
             GameProfile profile = new GameProfile(UUID.randomUUID(), null);
             profile.getProperties().put("textures", new Property("textures", value));
