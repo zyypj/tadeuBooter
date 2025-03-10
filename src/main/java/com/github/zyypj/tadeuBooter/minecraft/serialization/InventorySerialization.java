@@ -1,15 +1,14 @@
 package com.github.zyypj.tadeuBooter.minecraft.serialization;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Classe utilitária para serializar e desserializar objetos de Inventory e ItemStack do Bukkit.
@@ -20,6 +19,55 @@ public final class InventorySerialization {
 
     private InventorySerialization() {
         throw new UnsupportedOperationException("Esta classe não pode ser instanciada");
+    }
+
+    /**
+     * Converte um inventário em uma String..
+     *
+     * @param inventory O inventário a ser convertido.
+     * @return String contendo os dados do inventário.
+     */
+    public static String inventoryToString(Inventory inventory) {
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("size", inventory.getSize());
+
+        for (int i = 0; i < inventory.getSize(); i++) {
+            config.set("items." + i, inventory.getItem(i));
+        }
+
+        StringWriter writer = new StringWriter();
+        try {
+            config.save(String.valueOf(writer));
+        } catch (Exception e) {
+            throw new RuntimeException("Falha ao salvar o inventário para String", e);
+        }
+
+        return writer.toString();
+    }
+
+    /**
+     * Converte uma String para um inventário do Bukkit.
+     *
+     * @param data  A string do inventário salvo.
+     * @param title O título do inventário ao recriá-lo.
+     * @return O inventário restaurado.
+     */
+    public static Inventory inventoryFromString(String data, String title) {
+        if (data == null || data.trim().isEmpty()) {
+            throw new IllegalArgumentException("A string do inventário não pode ser nula ou vazia.");
+        }
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(new StringReader(data));
+        int size = config.getInt("size");
+        Inventory inventory = Bukkit.createInventory(null, size, title);
+
+        for (int i = 0; i < size; i++) {
+            if (config.contains("items." + i)) {
+                inventory.setItem(i, config.getItemStack("items." + i));
+            }
+        }
+
+        return inventory;
     }
 
     /**
