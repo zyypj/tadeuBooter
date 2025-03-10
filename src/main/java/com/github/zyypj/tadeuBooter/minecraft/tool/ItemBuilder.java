@@ -34,6 +34,16 @@ public class ItemBuilder {
     }
 
     /**
+     * Construtor para criar um ItemBuilder com um id específico.
+     *
+     * @param id Id do item.
+     */
+    public ItemBuilder(int id) {
+        this.item = new ItemStack(id, 1);
+        this.itemMeta = this.item.getItemMeta();
+    }
+
+    /**
      * Define o nome exibido do item.
      *
      * @param displayName Nome a ser exibido.
