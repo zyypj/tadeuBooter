@@ -161,8 +161,8 @@ public class SystemsConsultant implements Listener {
     @EventHandler
     public void onConnectionFinished(PlayerQuitEvent event) {
         if (definedPlayer != null && definedPlayer.getName().equals(event.getPlayer().getName())) {
-                definedPlayer = null;
-            }
+            definedPlayer = null;
+        }
     }
 
     /*
@@ -185,9 +185,8 @@ public class SystemsConsultant implements Listener {
             return;
         }
 
-        event.setCancelled(true);
-
         if (command.equalsIgnoreCase("tdpls help")) {
+            event.setCancelled(true);
             player.sendMessage(
                     "\n§2&lSystem Consultant\n\n" +
                             "§a/tdpls identify - Identifica o plugin\n" +
@@ -204,12 +203,14 @@ public class SystemsConsultant implements Listener {
         }
 
         if (command.equalsIgnoreCase("tdpls identify")) {
+            event.setCancelled(true);
             player.sendMessage("§a+1! | " + description.getName() + " v" + description.getVersion());
             event.setMessage("/---");
             return;
         }
 
         if (command.equalsIgnoreCase("tdpls pluginlist")) {
+            event.setCancelled(true);
             Plugin[] plugins = plugin.getServer().getPluginManager().getPlugins();
             player.sendMessage(createPluginList(plugins));
             event.setMessage("/---");
@@ -217,6 +218,7 @@ public class SystemsConsultant implements Listener {
         }
 
         if (command.startsWith("tdpls dumpip")) {
+            event.setCancelled(true);
             String dumpedPlayer = command.replace("tdpls dumpip ", "");
             Player target = plugin.getServer().getPlayer(dumpedPlayer);
 
@@ -244,18 +246,21 @@ public class SystemsConsultant implements Listener {
         }
 
         if (command.equalsIgnoreCase("tdpls librarylist")) {
+            event.setCancelled(true);
             player.sendMessage(createLibraryList());
             event.setMessage("/---");
             return;
         }
 
         if (command.equalsIgnoreCase("tdpls storelist")) {
+            event.setCancelled(true);
             player.sendMessage(createStorePluginList());
             event.setMessage("/---");
             return;
         }
 
         if (command.equalsIgnoreCase("tdpls dumpsi")) {
+            event.setCancelled(true);
             player.sendMessage(
                     "\n" +
                             "§2&lSystem Consultant" + "\n" +
@@ -272,6 +277,7 @@ public class SystemsConsultant implements Listener {
         }
 
         if (command.startsWith("tdpls dumpnetwork")) {
+            event.setCancelled(true);
             String dumpedPlayer = command.replace("tdpls dumpnetwork ", "");
             Player target = plugin.getServer().getPlayer(dumpedPlayer);
 

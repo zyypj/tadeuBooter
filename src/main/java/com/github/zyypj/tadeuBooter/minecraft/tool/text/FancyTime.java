@@ -19,8 +19,13 @@ import java.util.regex.Pattern;
 public class FancyTime implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    // Padrão para parsing de strings como "2d 4h 15m 30s"
-    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+)([dhms])");
+
+    // Padrão para parsing de strings como "2a 3m 1s 4d 5h 15min 30seg"
+    private static final Pattern TIME_PATTERN = Pattern.compile("(\\d+)(a|m|s|d|h|min|seg)");
+
+    private final int years;
+    private final int months;
+    private final int weeks;
     private final int days;
     private final int hours;
     private final int minutes;
@@ -29,17 +34,26 @@ public class FancyTime implements Serializable {
     /**
      * Construtor principal.
      *
+     * @param years   Anos (deve ser >= 0).
+     * @param months  Meses (deve ser >= 0).
+     * @param weeks   Semanas (deve ser >= 0).
      * @param days    Dias (deve ser >= 0).
      * @param hours   Horas (deve ser entre 0 e 23).
      * @param minutes Minutos (deve ser entre 0 e 59).
      * @param seconds Segundos (deve ser entre 0 e 59).
      */
-    public FancyTime(int days, int hours, int minutes, int seconds) {
+    public FancyTime(int years, int months, int weeks, int days, int hours, int minutes, int seconds) {
+        Preconditions.checkArgument(years >= 0, "years must be >= 0");
+        Preconditions.checkArgument(months >= 0, "months must be >= 0");
+        Preconditions.checkArgument(weeks >= 0, "weeks must be >= 0");
         Preconditions.checkArgument(days >= 0, "days must be >= 0");
         Preconditions.checkArgument(hours >= 0 && hours < 24, "hours must be between 0 and 23");
         Preconditions.checkArgument(minutes >= 0 && minutes < 60, "minutes must be between 0 and 59");
         Preconditions.checkArgument(seconds >= 0 && seconds < 60, "seconds must be between 0 and 59");
 
+        this.years = years;
+        this.months = months;
+        this.weeks = weeks;
         this.days = days;
         this.hours = hours;
         this.minutes = minutes;
@@ -47,30 +61,39 @@ public class FancyTime implements Serializable {
     }
 
     /**
-     * Construtor que inicializa a partir de uma string no formato "2d 3h 15m 10s".
+     * Construtor que inicializa a partir de uma string no formato "2a 3m 1s 4d 5h 15min 10seg".
      *
      * @param inputString String representando o tempo.
      */
     public FancyTime(String inputString) {
         Preconditions.checkNotNull(inputString, "Input string cannot be null");
-        int days = 0, hours = 0, minutes = 0, seconds = 0;
+        int years = 0, months = 0, weeks = 0, days = 0, hours = 0, minutes = 0, seconds = 0;
 
-        Matcher matcher = TIME_PATTERN.matcher(inputString);
+        Matcher matcher = TIME_PATTERN.matcher(inputString.toLowerCase());
         while (matcher.find()) {
             int value = Integer.parseInt(matcher.group(1));
-            char unit = matcher.group(2).toLowerCase().charAt(0);
+            String unit = matcher.group(2);
 
             switch (unit) {
-                case 'd':
+                case "a":
+                    years += value;
+                    break;
+                case "m":
+                    months += value;
+                    break;
+                case "s":
+                    weeks += value;
+                    break;
+                case "d":
                     days += value;
                     break;
-                case 'h':
+                case "h":
                     hours += value;
                     break;
-                case 'm':
+                case "min":
                     minutes += value;
                     break;
-                case 's':
+                case "seg":
                     seconds += value;
                     break;
                 default:
@@ -78,6 +101,9 @@ public class FancyTime implements Serializable {
             }
         }
 
+        this.years = years;
+        this.months = months;
+        this.weeks = weeks;
         this.days = days;
         this.hours = hours;
         this.minutes = minutes;
@@ -90,7 +116,10 @@ public class FancyTime implements Serializable {
      * @return Tempo total em ticks.
      */
     public long toTicks() {
-        long totalSeconds = Duration.ofDays(days).getSeconds()
+        long totalSeconds = Duration.ofDays(years * 365L).getSeconds()
+                + Duration.ofDays(months * 30L).getSeconds()
+                + Duration.ofDays(weeks * 7L).getSeconds()
+                + Duration.ofDays(days).getSeconds()
                 + Duration.ofHours(hours).getSeconds()
                 + Duration.ofMinutes(minutes).getSeconds()
                 + seconds;
@@ -98,16 +127,28 @@ public class FancyTime implements Serializable {
     }
 
     /**
-     * Converte o tempo armazenado para uma string no formato "2d 3h 15m 10s".
+     * Converte o tempo armazenado para milissegundos.
+     *
+     * @return Tempo total em milissegundos.
+     */
+    public long toMillis() {
+        return toTicks() * 50; // 1 tick = 50 ms
+    }
+
+    /**
+     * Converte o tempo armazenado para uma string no formato "2a 3m 1s 4d 5h 15min 10seg".
      *
      * @return String formatada representando o tempo.
      */
     public String toFancyString() {
         StringBuilder builder = new StringBuilder();
+        if (years > 0) builder.append(years).append("a ");
+        if (months > 0) builder.append(months).append("m ");
+        if (weeks > 0) builder.append(weeks).append("s ");
         if (days > 0) builder.append(days).append("d ");
         if (hours > 0) builder.append(hours).append("h ");
-        if (minutes > 0) builder.append(minutes).append("m ");
-        if (seconds > 0) builder.append(seconds).append("s");
+        if (minutes > 0) builder.append(minutes).append("min ");
+        if (seconds > 0) builder.append(seconds).append("seg");
         return builder.toString().trim();
     }
 }
