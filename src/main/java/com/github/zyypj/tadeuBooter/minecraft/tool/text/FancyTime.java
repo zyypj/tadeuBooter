@@ -151,4 +151,15 @@ public class FancyTime implements Serializable {
         if (seconds > 0) builder.append(seconds).append("seg");
         return builder.toString().trim();
     }
+
+    /**
+     * Verifica se o período representado já expirou considerando o tempo de início informado.
+     *
+     * @param startTimeMillis O instante (em milissegundos) em que o período começou.
+     * @return true se o tempo atual já ultrapassou (startTimeMillis + período), false caso contrário.
+     */
+    public boolean isExpired(long startTimeMillis) {
+        long expirationMillis = startTimeMillis + this.toMillis();
+        return System.currentTimeMillis() >= expirationMillis;
+    }
 }
