@@ -14,17 +14,58 @@ public class YAML extends YamlConfiguration {
     private final Plugin plugin;
     private final File configFile;
 
+    /**
+     * Construtor que utiliza o data folder do plugin.
+     */
     public YAML(String name, Plugin plugin) throws IOException, InvalidConfigurationException {
+        this(name, plugin, plugin.getDataFolder());
+    }
+
+    /**
+     * Construtor que permite especificar uma pasta customizada para o arquivo de configuração.
+     *
+     * @param name   Nome do arquivo.
+     * @param plugin Instância do plugin.
+     * @param folder Pasta onde o arquivo será salvo (pode ser o data folder do plugin, a pasta do servidor, etc.).
+     */
+    public YAML(String name, Plugin plugin, File folder) throws IOException, InvalidConfigurationException {
         this.plugin = plugin;
-        this.configFile = new File(plugin.getDataFolder(), name.endsWith(".yml") ? name : name + ".yml");
+        if (folder == null) {
+            folder = plugin.getDataFolder();
+        }
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+        this.configFile = new File(folder, name.endsWith(".yml") ? name : name + ".yml");
         this.loadConfig();
+    }
+
+    /**
+     * Salva o arquivo de configuração com o conteúdo padrão contido no plugin, se o arquivo não existir.
+     * Essa implementação é semelhante ao método saveDefaultConfig() do JavaPlugin.
+     */
+    public void saveDefaultConfig() {
+        if (!this.configFile.exists()) {
+            if (plugin.getResource(this.configFile.getName()) != null) {
+                plugin.saveResource(this.configFile.getName(), false);
+            } else {
+                try {
+                    this.configFile.getParentFile().mkdirs();
+                    this.configFile.createNewFile();
+                } catch (IOException e) {
+                    plugin.getServer().getConsoleSender().sendMessage("§cErro ao criar o arquivo "
+                            + this.configFile.getName() + ": " + e);
+                }
+            }
+        }
     }
 
     public void save() {
         try {
             this.save(this.configFile);
         } catch (IOException e) {
-            plugin.getServer().getConsoleSender().sendMessage("§cOcorreu um erro ao salvar o arquivo " + this.configFile.getName() + ": " + e);
+            plugin.getServer().getConsoleSender().sendMessage("§cOcorreu um erro ao salvar o arquivo "
+                    + this.configFile.getName() + ": " + e);
         }
     }
 
@@ -32,26 +73,22 @@ public class YAML extends YamlConfiguration {
         try {
             this.loadConfig();
         } catch (IOException e) {
-            plugin.getServer().getConsoleSender().sendMessage("§cOcorreu um erro ao criar o arquivo " + this.configFile.getName() + ": " + e);
+            plugin.getServer().getConsoleSender().sendMessage("§cOcorreu um erro ao criar o arquivo "
+                    + this.configFile.getName() + ": " + e);
         } catch (InvalidConfigurationException e) {
-            plugin.getServer().getConsoleSender().sendMessage("§cO arquivo " + this.configFile.getName() + " é inválido: " + e);
+            plugin.getServer().getConsoleSender().sendMessage("§cO arquivo "
+                    + this.configFile.getName() + " é inválido: " + e);
         }
-
     }
 
     private void loadConfig() throws IOException, InvalidConfigurationException {
-        if (!this.plugin.getDataFolder().exists()) {
-            this.plugin.getDataFolder().mkdir();
-        }
-
         if (!this.configFile.exists()) {
             try {
-                this.plugin.saveResource(this.configFile.getName(), false);
-            } catch (IllegalArgumentException var2) {
+                plugin.saveResource(this.configFile.getName(), false);
+            } catch (IllegalArgumentException ex) {
                 this.configFile.createNewFile();
             }
         }
-
         this.load(this.configFile);
     }
 
@@ -71,7 +108,7 @@ public class YAML extends YamlConfiguration {
 
     public void createDefaults() {
         if (!this.configFile.exists()) {
-            this.plugin.saveResource(this.configFile.getName(), false);
+            plugin.saveResource(this.configFile.getName(), false);
         }
     }
 
@@ -102,14 +139,16 @@ public class YAML extends YamlConfiguration {
     public List<String> getStringList(String path, boolean translateColors) {
         List<String> list = this.getStringList(path);
         if (translateColors && list != null) {
-            return list.stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
+            return list.stream()
+                    .map(line -> ChatColor.translateAlternateColorCodes('&', line))
+                    .collect(Collectors.toList());
         }
         return list;
     }
 
     public void create() {
         if (!this.configFile.exists()) {
-            this.plugin.saveResource(this.configFile.getName(), false);
+            plugin.saveResource(this.configFile.getName(), false);
         }
     }
 }
