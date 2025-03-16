@@ -38,6 +38,7 @@ public class ItemBuilder {
      *
      * @param id Id do item.
      */
+    @Deprecated
     public ItemBuilder(int id) {
         this.item = new ItemStack(id, 1);
         this.itemMeta = this.item.getItemMeta();
