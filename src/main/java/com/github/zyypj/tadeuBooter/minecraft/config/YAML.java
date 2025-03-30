@@ -7,6 +7,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,34 @@ public class YAML extends YamlConfiguration {
                 } catch (IOException e) {
                     plugin.getServer().getConsoleSender().sendMessage("§cErro ao criar o arquivo "
                             + this.configFile.getName() + ": " + e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Salva o arquivo de configuração com o conteúdo padrão contido no plugin, se o arquivo não existir, mas em outro diretório.
+     * Essa implementação é semelhante ao método saveDefaultConfig() do JavaPlugin.
+     */
+    public void saveDefaultConfig(String resourcePath) {
+        if (!this.configFile.exists()) {
+            InputStream resourceStream = this.plugin.getResource(resourcePath);
+            if (resourceStream != null) {
+                try {
+                    Files.copy(resourceStream, this.configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ex) {
+                    this.plugin.getServer().getConsoleSender().sendMessage(
+                            "§cErro ao copiar o recurso " + resourcePath + " para " + this.configFile.getName() + ": " + ex.getMessage()
+                    );
+                }
+            } else {
+                try {
+                    this.configFile.getParentFile().mkdirs();
+                    this.configFile.createNewFile();
+                } catch (IOException e) {
+                    this.plugin.getServer().getConsoleSender().sendMessage(
+                            "§cErro ao criar o arquivo " + this.configFile.getName() + ": " + e
+                    );
                 }
             }
         }
