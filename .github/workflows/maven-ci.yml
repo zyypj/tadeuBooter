@@ -20,6 +20,9 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
+      - name: Dar permissão de execução ao gradlew
+        run: chmod +x gradlew
+
       - name: Configurar o JDK 8
         uses: actions/setup-java@v3
         with:
