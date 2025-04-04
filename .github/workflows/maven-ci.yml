@@ -3,10 +3,10 @@ name: Build e Release do TadeuBooter
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -25,18 +25,18 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '8'
-          cache: maven
+          cache: gradle
 
-      - name: Compilar o projeto com Maven
-        run: mvn clean package -DskipTests
+      - name: Compilar o projeto com Gradle (sem testes)
+        run: ./gradlew clean assemble -x test
 
       - name: Executar testes
-        run: mvn test
+        run: ./gradlew test
 
-      - name: Extrair versão do POM
+      - name: Extrair versão do build.gradle
         id: get_version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
           echo "$VERSION" > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tadeuBooter-${{ env.VERSION }}
-          path: target/*.jar
+          path: build/libs/*.jar
 
   release:
     needs: build
@@ -73,14 +73,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tadeuBooter-${{ env.VERSION }}
-          path: target/
+          path: build/libs/
 
       - name: Criar Release no GitHub
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
           name: "v${{ env.VERSION }}"
-          files: target/*.jar
+          files: build/libs/*.jar
           body: "Versão ${{ env.VERSION }} do TadeuBooter"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
