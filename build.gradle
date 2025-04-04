@@ -21,7 +21,6 @@ repositories {
 dependencies {
     compileOnly files("libs/spigot.jar")
     compileOnly files("libs/Vault.jar")
-    compileOnly files("libs/common.jar")
     compileOnly("org.projectlombok:lombok:1.18.38")
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.1.0'
 
