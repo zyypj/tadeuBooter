@@ -1,3 +1,0 @@
-name: tadeuBooter
-version: '${version}'
-main: com.github.zyypj.tadeuBooter.TadeuBooter
