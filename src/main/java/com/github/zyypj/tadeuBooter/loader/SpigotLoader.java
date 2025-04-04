@@ -44,7 +44,7 @@ public abstract class SpigotLoader extends JavaPlugin {
                 this.configuration.createDefaults();
                 configurable.loadConfig();
             } catch (Exception e) {
-                Debug.log("&a[MRK-CORE] &fErro aco carregar configuration.yml: " + e.getMessage(), false);
+                Debug.log("&a[MRK-CORE] &fErro ao carregar configuration.yml: " + e.getMessage(), false);
             }
         }
         Debug.setPlugin(this);
