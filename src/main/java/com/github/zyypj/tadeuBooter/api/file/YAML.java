@@ -7,6 +7,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -26,7 +27,12 @@ public class YAML extends YamlConfiguration {
     public YAML(String name, Plugin plugin, File folder) throws IOException, InvalidConfigurationException {
         this.plugin = plugin;
         if (folder == null) folder = plugin.getDataFolder();
-        if (!folder.exists()) folder.mkdirs();
+        if (!folder.exists()) {
+            boolean created = folder.mkdirs();
+            if (!created) {
+                throw new IOException("Could not create folder: " + folder.getAbsolutePath());
+            }
+        }
 
         this.configFile = new File(folder, name.endsWith(".yml") ? name : name + ".yml");
         this.loadConfig();
@@ -34,27 +40,72 @@ public class YAML extends YamlConfiguration {
 
     private void loadConfig() throws IOException, InvalidConfigurationException {
         if (!this.configFile.exists()) {
-            try {
-                plugin.saveResource(this.configFile.getName(), false);
-            } catch (IllegalArgumentException ex) {
-                this.configFile.createNewFile();
+            if (plugin.getResource(this.configFile.getName()) != null) {
+                copyResource(this.configFile.getName(), this.configFile);
+            } else {
+                boolean created = this.configFile.createNewFile();
+                if (!created) {
+                    throw new IOException("Could not create config file: " + configFile.getAbsolutePath());
+                }
             }
         }
         this.load(this.configFile);
     }
 
+    private void copyResource(String resourcePath, File destination) throws IOException {
+        try (InputStream in = plugin.getResource(resourcePath)) {
+            if (in == null) {
+                throw new IOException("Resource " + resourcePath + " not found in plugin jar");
+            }
+            Files.copy(in, destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
     public void saveDefaultConfig() {
         if (!this.configFile.exists()) {
             if (plugin.getResource(this.configFile.getName()) != null) {
-                plugin.saveResource(this.configFile.getName(), false);
+                try {
+                    copyResource(this.configFile.getName(), this.configFile);
+                } catch (IOException e) {
+                    logError("Erro ao salvar recurso padrão para o arquivo " + this.configFile.getName(), e);
+                }
             } else {
                 try {
-                    this.configFile.getParentFile().mkdirs();
-                    this.configFile.createNewFile();
+                    if (!this.configFile.getParentFile().exists()) {
+                        boolean created = this.configFile.getParentFile().mkdirs();
+                        if (!created) {
+                            logError("Não foi possível criar diretório para o arquivo " + this.configFile.getName(), new IOException("mkdirs retornou false"));
+                        }
+                    }
+                    boolean created = this.configFile.createNewFile();
+                    if (!created) {
+                        logError("Não foi possível criar o arquivo " + this.configFile.getName(), new IOException("createNewFile retornou false"));
+                    }
                 } catch (IOException e) {
                     logError("Erro ao criar o arquivo " + this.configFile.getName(), e);
                 }
             }
+        }
+    }
+
+    public void createDefaults() {
+        saveDefaultConfig();
+    }
+
+    public boolean exists() {
+        return this.configFile.exists();
+    }
+
+    public boolean delete() {
+        return this.configFile.delete();
+    }
+
+    public void backup(String suffix) {
+        File backupFile = new File(configFile.getParent(), configFile.getName() + "." + suffix + ".backup");
+        try {
+            Files.copy(configFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            plugin.getLogger().warning("Não foi possível criar o backup de: " + configFile.getName());
         }
     }
 
@@ -83,35 +134,6 @@ public class YAML extends YamlConfiguration {
         if (!this.contains(path)) {
             this.set(path, value);
             this.save();
-        }
-    }
-
-    public void createDefaults() {
-        if (!this.configFile.exists()) {
-            plugin.saveResource(this.configFile.getName(), false);
-        }
-    }
-
-    public void create() {
-        if (!this.configFile.exists()) {
-            plugin.saveResource(this.configFile.getName(), false);
-        }
-    }
-
-    public boolean exists() {
-        return this.configFile.exists();
-    }
-
-    public boolean delete() {
-        return this.configFile.delete();
-    }
-
-    public void backup(String suffix) {
-        File backupFile = new File(configFile.getParent(), configFile.getName() + "." + suffix + ".backup");
-        try {
-            Files.copy(configFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Não foi possível criar o backup de: " + configFile.getName());
         }
     }
 
