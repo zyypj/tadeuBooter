@@ -26,10 +26,7 @@ public class ItemsUtil {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("ItemStack{")
-                .append("Material=").append(item.getType())
-                .append(", Amount=").append(item.getAmount())
-                .append(", Durability=").append(item.getDurability());
+        sb.append("ItemStack{").append("Material=").append(item.getType()).append(", Amount=").append(item.getAmount()).append(", Durability=").append(item.getDurability());
 
         ItemMeta itemMeta = item.getItemMeta();
         if (itemMeta != null) {
@@ -164,7 +161,7 @@ public class ItemsUtil {
                             if (ench != null) {
                                 unsafeEnchantments.put(ench, level);
                             }
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                 }
@@ -202,7 +199,7 @@ public class ItemsUtil {
                 try {
                     ItemFlag itemFlag = ItemFlag.valueOf(flag);
                     itemFlags.add(itemFlag);
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }
