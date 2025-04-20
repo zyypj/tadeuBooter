@@ -52,7 +52,7 @@ class AutoUpdater(
      */
     private fun getLatestVersion(): String? {
         val request = HttpRequest<String>(updateCheckUrl)
-        return if (request.execute()) request.response.rawData.trim() else null
+        return if (request.execute()) request.response?.rawData?.trim() else null
     }
 
     /**
