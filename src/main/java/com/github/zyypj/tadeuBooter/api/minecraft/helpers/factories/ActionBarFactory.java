@@ -28,7 +28,7 @@ public class ActionBarFactory {
         try {
             PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.CHAT);
             packetContainer.getChatComponents().write(0, WrappedChatComponent.fromText(content.replace("&", "§")));
-            packetContainer.getBytes().write(0, (byte) 2); // Indica que a mensagem é um ActionBar na versão 1.8.8
+            packetContainer.getBytes().write(0, (byte) 2);
 
             protocolManager.sendServerPacket(viewer, packetContainer);
         } catch (Exception e) {
@@ -59,5 +59,4 @@ public class ActionBarFactory {
             sendActionBar(content, viewer);
         }
     }
-
 }
