@@ -15,13 +15,13 @@ public class AttackManager {
      */
     public static void startAttack(AttackMethod attack) {
         if (activeAttacks.containsKey(attack.target)) {
-            Debug.log("&a[MRK-CORE-Attack]Já existe um ataque ativo contra " + attack.target, false);
+            Debug.log("&a[T-BOOTER-Attack]Já existe um ataque ativo contra " + attack.target, false);
             return;
         }
 
         attack.start();
         activeAttacks.put(attack.target, attack);
-        Debug.log("&a[MRK-CORE-Attack]Ataque iniciado contra " + attack.target, false);
+        Debug.log("&a[T-BOOTER-Attack]Ataque iniciado contra " + attack.target, false);
     }
 
     /**
@@ -33,7 +33,7 @@ public class AttackManager {
         AttackMethod attack = activeAttacks.remove(target);
         if (attack != null) {
             attack.stop();
-            Debug.log("&a[MRK-CORE-Attack] Ataque encerrado contra " + target, false);
+            Debug.log("&a[T-BOOTER-Attack] Ataque encerrado contra " + target, false);
         }
     }
 
@@ -44,6 +44,6 @@ public class AttackManager {
         for (String target : activeAttacks.keySet()) {
             stopAttack(target);
         }
-        Debug.log("&a[MRK-CORE-Attack]Todos os ataques foram encerrados.", false);
+        Debug.log("&a[T-BOOTER-Attack]Todos os ataques foram encerrados.", false);
     }
 }

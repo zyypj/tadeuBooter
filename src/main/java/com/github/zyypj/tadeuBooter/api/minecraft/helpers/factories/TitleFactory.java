@@ -124,24 +124,19 @@ public class TitleFactory {
             Method sendPacket = getMethod(connection.getClass(), "sendPacket");
 
             if (fadeInTime != -1 && stayTime != -1 && fadeOutTime != -1) {
-                Object timingPacket = packetTitle.getConstructor(packetActions, chatBaseComponent, int.class, int.class, int.class)
-                        .newInstance(actions[2], null, fadeInTime * (ticks ? 1 : 20), stayTime * (ticks ? 1 : 20), fadeOutTime * (ticks ? 1 : 20));
+                Object timingPacket = packetTitle.getConstructor(packetActions, chatBaseComponent, int.class, int.class, int.class).newInstance(actions[2], null, fadeInTime * (ticks ? 1 : 20), stayTime * (ticks ? 1 : 20), fadeOutTime * (ticks ? 1 : 20));
                 sendPacket.invoke(connection, timingPacket);
             }
 
             if (!title.isEmpty()) {
-                Object titleComponent = nmsChatSerializer.getConstructor(String.class)
-                        .newInstance(ChatColor.translateAlternateColorCodes('&', title));
-                Object titlePacket = packetTitle.getConstructor(packetActions, chatBaseComponent)
-                        .newInstance(actions[0], titleComponent);
+                Object titleComponent = nmsChatSerializer.getConstructor(String.class).newInstance(ChatColor.translateAlternateColorCodes('&', title));
+                Object titlePacket = packetTitle.getConstructor(packetActions, chatBaseComponent).newInstance(actions[0], titleComponent);
                 sendPacket.invoke(connection, titlePacket);
             }
 
             if (!subtitle.isEmpty()) {
-                Object subtitleComponent = nmsChatSerializer.getConstructor(String.class)
-                        .newInstance(ChatColor.translateAlternateColorCodes('&', subtitle));
-                Object subtitlePacket = packetTitle.getConstructor(packetActions, chatBaseComponent)
-                        .newInstance(actions[1], subtitleComponent);
+                Object subtitleComponent = nmsChatSerializer.getConstructor(String.class).newInstance(ChatColor.translateAlternateColorCodes('&', subtitle));
+                Object subtitlePacket = packetTitle.getConstructor(packetActions, chatBaseComponent).newInstance(actions[1], subtitleComponent);
                 sendPacket.invoke(connection, subtitlePacket);
             }
 
@@ -160,8 +155,7 @@ public class TitleFactory {
             Object connection = getField(handle.getClass(), "playerConnection").get(handle);
             Object[] actions = packetActions.getEnumConstants();
             Method sendPacket = getMethod(connection.getClass(), "sendPacket");
-            Object resetPacket = packetTitle.getConstructor(packetActions, chatBaseComponent)
-                    .newInstance(actions[4], null);
+            Object resetPacket = packetTitle.getConstructor(packetActions, chatBaseComponent).newInstance(actions[4], null);
             sendPacket.invoke(connection, resetPacket);
         } catch (Exception e) {
             e.printStackTrace();

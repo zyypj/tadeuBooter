@@ -1,20 +1,10 @@
 package com.github.zyypj.tadeuBooter.api.json
 
+import com.github.zyypj.tadeuBooter.loader.Constants
 import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
-import com.github.zyypj.tadeuBooter.loader.Constants
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import kotlin.jvm.JvmStatic
-import kotlin.jvm.Throws
+import java.io.*
 
 /**
  * Utilitários para leitura, gravação e manipulação de arquivos JSON usando Gson.
@@ -37,8 +27,7 @@ object JsonFileUtils {
 
     /** Converte uma string JSON em JsonObject. */
     @JvmStatic
-    fun toObject(json: String): JsonObject =
-        Constants.GSON.fromJson(json, JsonObject::class.java)
+    fun toObject(json: String): JsonObject = Constants.GSON.fromJson(json, JsonObject::class.java)
 
     /**
      * Lê ou cria um JsonObject no arquivo especificado.

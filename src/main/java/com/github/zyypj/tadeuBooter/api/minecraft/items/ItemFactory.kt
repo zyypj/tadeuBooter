@@ -13,11 +13,10 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.util.UUID
+import java.util.*
 
 /**
  * Constrói e customiza ItemStacks de forma fluente.
- * Compatível com chamadas Java.
  */
 class ItemFactory {
     val item: ItemStack
@@ -36,8 +35,7 @@ class ItemFactory {
      */
     @Deprecated("Use constructor(material: Material) instead")
     constructor(typeId: Int) : this(
-        Material.getMaterial(typeId)
-            ?: throw IllegalArgumentException("Material id $typeId not found")
+        Material.getMaterial(typeId) ?: throw IllegalArgumentException("Material id $typeId not found")
     )
 
     /** Define o nome (displayName) do ItemStack. */

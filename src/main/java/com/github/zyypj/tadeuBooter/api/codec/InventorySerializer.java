@@ -38,7 +38,8 @@ public class InventorySerializer {
             itemData.put("durability", stack.getDurability());
 
             if (stack.hasItemMeta()) {
-                itemData.put("meta", gson.toJson(stack.getItemMeta(), new TypeToken<ItemMeta>() {}.getType()));
+                itemData.put("meta", gson.toJson(stack.getItemMeta(), new TypeToken<ItemMeta>() {
+                }.getType()));
             }
 
             if (stack.getData() != null) {
