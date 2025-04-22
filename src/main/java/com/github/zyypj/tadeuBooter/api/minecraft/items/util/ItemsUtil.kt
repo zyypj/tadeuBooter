@@ -3,63 +3,96 @@ package com.github.zyypj.tadeuBooter.api.minecraft.items.util
 import com.comphenix.protocol.wrappers.nbt.NbtCompound
 import com.comphenix.protocol.wrappers.nbt.NbtFactory
 import com.github.zyypj.tadeuBooter.api.minecraft.items.ItemFactory
+import com.mojang.authlib.GameProfile
+import com.mojang.authlib.properties.Property
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
+import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.util.stream.Collectors
 
 object ItemsUtil {
-    private val serverVersion = Bukkit.getServer().javaClass.`package`.name.substringAfterLast('.')
+    private val serverVersion: String
+    private val craftItemStackClass: Class<*>
+    private val nmsItemClass: Class<*>
+    private val nbtTagCompoundClass: Class<*>
+    private val mojangsonParserClass: Class<*>
 
-    private val craftItemStackClass = Class.forName("org.bukkit.craftbukkit.$serverVersion.inventory.CraftItemStack")
-    private val nmsItemClass = Class.forName("net.minecraft.server.$serverVersion.ItemStack")
-    private val nbtTagCompoundClass = Class.forName("net.minecraft.server.$serverVersion.NBTTagCompound")
-    private val mojangsonParserClass = Class.forName("net.minecraftr.server.$serverVersion.MojangsonParser")
+    init {
+        try {
+            val pkg = Bukkit.getServer().javaClass.`package`.name
+            serverVersion = pkg.substringAfterLast('.')
+            craftItemStackClass = Class.forName("org.bukkit.craftbukkit.$serverVersion.inventory.CraftItemStack")
+            nmsItemClass = Class.forName("net.minecraft.server.$serverVersion.ItemStack")
+            nbtTagCompoundClass = Class.forName("net.minecraft.server.$serverVersion.NBTTagCompound")
+            mojangsonParserClass = Class.forName("net.minecraft.server.$serverVersion.MojangsonParser")
+        } catch (e: Exception) {
+            throw ExceptionInInitializerError(e)
+        }
+    }
 
-    fun serialize(item: ItemStack?): String = when {
-        item == null || item.type == Material.AIR -> ""
-        else -> {
-            val asNms = craftItemStackClass.getMethod("asNMSCopy", ItemStack::class.java).invoke(null, item)
-
-            val tag =
-                nmsItemClass.getMethod("getTag").invoke(asNms) ?: nbtTagCompoundClass.getConstructor().newInstance()
-
+    @JvmStatic
+    fun serialize(item: ItemStack?): String {
+        if (item == null || item.type == Material.AIR) return ""
+        return try {
+            val asNms = craftItemStackClass
+                .getMethod("asNMSCopy", ItemStack::class.java)
+                .invoke(null, item)
+            val tag = nmsItemClass
+                .getMethod("getTag")
+                .invoke(asNms)
+                ?: nbtTagCompoundClass.getConstructor().newInstance()
             tag.toString()
+        } catch (e: Exception) {
+            throw RuntimeException(e)
         }
     }
 
-    fun deserialize(data: String): ItemStack = when {
-        data.isBlank() -> ItemStack(Material.AIR)
-        else -> {
+    @JvmStatic
+    fun deserialize(data: String?): ItemStack {
+        if (data.isNullOrBlank()) return ItemStack(Material.AIR)
+        return try {
             val parseMethod: Method = mojangsonParserClass.getMethod("a", String::class.java)
-
             val compound = parseMethod.invoke(null, data)
-            val nmsItem = nmsItemClass.getConstructor(nbtTagCompoundClass).newInstance(compound)
-
-            craftItemStackClass.getMethod("asBukkitCopy", nmsItemClass).invoke(null, nmsItem) as ItemStack
+            val nmsItem = nmsItemClass
+                .getConstructor(nbtTagCompoundClass)
+                .newInstance(compound)
+            craftItemStackClass
+                .getMethod("asBukkitCopy", nmsItemClass)
+                .invoke(null, nmsItem) as ItemStack
+        } catch (e: Exception) {
+            throw RuntimeException(e)
         }
     }
 
-    fun applyFactory(serialized: String): ItemFactory = ItemFactory(deserialize(serialized).type).also { factory ->
+    @JvmStatic
+    fun applyFactory(serialized: String): ItemFactory {
         val bukkit = deserialize(serialized)
-        bukkit.itemMeta?.let { factory.item.itemMeta = it }
+        return ItemFactory(bukkit.type).also { factory ->
+            bukkit.itemMeta?.let { factory.item.itemMeta = it }
+        }
     }
 
-    fun formatEnchantments(enchants: Map<Enchantment, Int>): String = enchants.entries.joinToString(", ") {
-        "${it.key}:${
-            it.value
-        }"
-    }
+    @JvmStatic
+    fun formatEnchantments(enchants: Map<Enchantment, Int>): String =
+        enchants.entries.joinToString(", ") { "${it.key}: ${it.value}" }
 
+    @JvmStatic
     fun extractSkullValue(item: ItemStack): String? {
         val meta = item.itemMeta as? SkullMeta ?: return null
-        val field = meta::class.java.getDeclaredField("profile").apply { isAccessible = true }
-        val profile = field.get(meta) as com.mojang.authlib.GameProfile
-        return profile.properties.get("textures")?.firstOrNull()?.value
+        return try {
+            val field: Field = meta.javaClass.getDeclaredField("profile").apply { isAccessible = true }
+            val profile = field.get(meta) as GameProfile
+            profile.properties["textures"]?.firstOrNull()?.value
+        } catch (e: Exception) {
+            null
+        }
     }
 
+    @JvmStatic
     fun setTag(item: ItemStack, key: String, value: String): ItemStack {
         val compound = NbtFactory.fromItemTag(item) as NbtCompound
         compound.put(key, value)
@@ -67,11 +100,13 @@ object ItemsUtil {
         return item
     }
 
+    @JvmStatic
     fun getTag(item: ItemStack, key: String): String? {
         val compound = NbtFactory.fromItemTag(item) as NbtCompound
         return if (compound.containsKey(key)) compound.getString(key) else null
     }
 
+    @JvmStatic
     fun removeTag(item: ItemStack, key: String): ItemStack {
         val compound = NbtFactory.fromItemTag(item) as NbtCompound
         compound.remove<String>(key)
@@ -79,6 +114,7 @@ object ItemsUtil {
         return item
     }
 
+    @JvmStatic
     fun hasTag(item: ItemStack, key: String): Boolean {
         val compound = NbtFactory.fromItemTag(item) as NbtCompound
         return compound.containsKey(key)
