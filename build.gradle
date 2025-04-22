@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github.zyypj'
-version = '1.8'
+version = '1.8.1'
 
 repositories {
     mavenCentral()

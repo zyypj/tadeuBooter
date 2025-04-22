@@ -27,6 +27,7 @@ object Debug {
      *
      * @param newPrefix Texto de prefixo com códigos ‘&’ para cores.
      */
+    @JvmStatic
     fun setPrefix(newPrefix: String) {
         prefix = ChatColor.translateAlternateColorCodes('&', newPrefix)
     }
