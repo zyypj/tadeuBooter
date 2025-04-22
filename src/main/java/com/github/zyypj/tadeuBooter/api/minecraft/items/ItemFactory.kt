@@ -75,15 +75,26 @@ class ItemFactory {
 
     /** Define o dono de cabeça de jogador pelo nome (owner). */
     fun setSkullOwner(owner: String): ItemFactory = apply {
-        if (item.type == Material.SKULL_ITEM || item.type.name == "PLAYER_HEAD") {
-            val skullMeta = itemMeta as SkullMeta
+        (itemMeta as? SkullMeta)?.let { skullMeta ->
             try {
-                val method: Method = skullMeta.javaClass.getMethod(
+                val mModern: Method = skullMeta.javaClass.getMethod(
                     "setOwningPlayer", org.bukkit.OfflinePlayer::class.java
                 )
-                method.invoke(skullMeta, Bukkit.getOfflinePlayer(owner))
-            } catch (_: Exception) {
-                skullMeta.owner = owner
+                mModern.invoke(skullMeta, Bukkit.getOfflinePlayer(owner))
+            } catch (e1: NoSuchMethodException) {
+                try {
+                    val mLegacy: Method = skullMeta.javaClass.getMethod(
+                        "setOwner", String::class.java
+                    )
+                    mLegacy.invoke(skullMeta, owner)
+                } catch (e2: NoSuchMethodException) {
+                    try {
+                        val f: Field = skullMeta.javaClass.getDeclaredField("owner")
+                        f.isAccessible = true
+                        f.set(skullMeta, owner)
+                    } catch (_: Exception) {
+                    }
+                }
             }
             itemMeta = skullMeta
         }
@@ -91,17 +102,20 @@ class ItemFactory {
 
     /** Define o valor de textura de cabeça via GameProfile. */
     fun setSkullValue(value: String): ItemFactory = apply {
-        if (item.type == Material.SKULL_ITEM || item.type.name == "PLAYER_HEAD") {
-            val skullMeta = itemMeta as SkullMeta
+        (itemMeta as? SkullMeta)?.let { skullMeta ->
             val profile = GameProfile(UUID.randomUUID(), null).apply {
                 properties.put("textures", Property("textures", value))
             }
-            try {
-                val profileField: Field = skullMeta.javaClass.getDeclaredField("profile")
-                profileField.isAccessible = true
-                profileField.set(skullMeta, profile)
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
+            var clazz: Class<*>? = skullMeta.javaClass
+            while (clazz != null) {
+                try {
+                    val field: Field = clazz.getDeclaredField("profile")
+                    field.isAccessible = true
+                    field.set(skullMeta, profile)
+                    break
+                } catch (_: NoSuchFieldException) {
+                    clazz = clazz.superclass
+                }
             }
             itemMeta = skullMeta
         }
