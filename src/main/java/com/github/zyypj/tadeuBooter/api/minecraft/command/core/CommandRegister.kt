@@ -10,15 +10,34 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.lang.reflect.Field
 import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
+
+object MetricManager {
+    private data class Stat(var count: Long = 0, var totalNanos: Long = 0)
+
+    private val stats = ConcurrentHashMap<String, Stat>()
+    fun record(key: String, nanos: Long) {
+        stats.compute(key) { _, st ->
+            val s = st ?: Stat()
+            s.count++
+            s.totalNanos += nanos
+            s
+        }
+    }
+
+    fun report(): Map<String, Pair<Long, Long>> =
+        stats.mapValues { (_, st) -> Pair(st.count, st.totalNanos / 1_000_000) }
+}
 
 object CommandRegister {
-
     @JvmStatic
     fun registerCommands(plugin: JavaPlugin, vararg handlers: Any) {
         val commandMap = fetchCommandMap()
+
         handlers.forEach { handler ->
             val clazz = handler.javaClass
             val cmdAnn = clazz.getAnnotation(Command::class.java) ?: return@forEach
+            val autoHelp = clazz.getAnnotation(AutoHelp::class.java)
 
             val subExec = mutableMapOf<List<String>, Method>()
             val subAnn = mutableMapOf<List<String>, SubCommand>()
@@ -29,15 +48,13 @@ object CommandRegister {
             clazz.declaredMethods.forEach { m ->
                 m.isAccessible = true
                 if (m.isAnnotationPresent(Execute::class.java)) {
-                    val sc = m.getAnnotation(SubCommand::class.java)
-                    if (sc != null) {
+                    m.getAnnotation(SubCommand::class.java)?.let { sc ->
                         val path = sc.path.toList()
                         subExec[path] = m
                         subAnn[path] = sc
-                    } else rootExec = m
+                    } ?: run { rootExec = m }
                 }
-                if (m.isAnnotationPresent(TabComplete::class.java)) {
-                    val tc = m.getAnnotation(TabComplete::class.java)
+                m.getAnnotation(TabComplete::class.java)?.let { tc ->
                     val path = tc.path.toList()
                     if (path.isEmpty()) rootTab = m
                     else tabProv[path] = m
@@ -51,9 +68,22 @@ object CommandRegister {
                 cmdAnn.aliases.toList()
             ) {
                 override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
+                    val argsList = args.toList()
+
+                    if (autoHelp != null && (argsList.isEmpty() || argsList[0].equals("help", true))) {
+                        sender.sendMessage(autoHelp.header)
+                        autoHelp.title.takeIf { it.isNotEmpty() }?.let { sender.sendMessage(it) }
+                        rootExec?.let { sender.sendMessage("/${cmdAnn.name} ${cmdAnn.usage} - ${cmdAnn.description}") }
+                        subAnn.forEach { (path, sc) ->
+                            val usage = path.joinToString(" ")
+                            sender.sendMessage("/${cmdAnn.name} $usage - ${sc.permission}")
+                        }
+                        return true
+                    }
+
                     rootExec?.getAnnotation(AllowedSenders::class.java)?.let { asn ->
-                        if (sender is Player && asn.value == SenderType.CONSOLE ||
-                            sender !is Player && asn.value == SenderType.PLAYER
+                        if ((sender is Player && asn.value == SenderType.CONSOLE)
+                            || (sender !is Player && asn.value == SenderType.PLAYER)
                         ) {
                             sender.sendMessage(asn.errorMessage)
                             return true
@@ -65,46 +95,34 @@ object CommandRegister {
                         return true
                     }
 
-                    val argsList = args.toList()
-                    val match = subExec.keys.sortedByDescending { it.size }
+                    val matchPath = subExec.keys.sortedByDescending { it.size }
                         .firstOrNull { path -> argsList.size >= path.size && argsList.take(path.size) == path }
-
-                    match?.let { path ->
-                        subAnn[path]?.let { sc ->
-                            if (sc.permission.isNotEmpty() && !sender.hasPermission(sc.permission)) {
-                                sender.sendMessage(sc.permissionMessage)
+                    matchPath?.let { sc ->
+                        subAnn[sc]?.let { scAnn ->
+                            if (scAnn.permission.isNotEmpty() && !sender.hasPermission(scAnn.permission)) {
+                                sender.sendMessage(scAnn.permissionMessage)
                                 return true
                             }
                         }
                     }
 
-                    val method = match?.let { subExec[it] } ?: rootExec
-                    val methodArgs = match?.size?.let { argsList.drop(it).toTypedArray() } ?: args
+                    val method = matchPath?.let { subExec[it] } ?: rootExec
+                    val methodArgs = matchPath?.size?.let { argsList.drop(it).toTypedArray() } ?: args
 
                     method?.getAnnotationsByType(Validate::class.java)?.forEach { v ->
-                        if (methodArgs.size <= v.index) {
-                            sender.sendMessage(v.errorMessage)
-                            return true
-                        }
-                        val a = methodArgs[v.index]
-                        val ok = when (v.type) {
-                            ArgType.INT -> a.toIntOrNull() != null
-                            ArgType.LONG -> a.toLongOrNull() != null
-                            ArgType.DOUBLE -> a.toDoubleOrNull() != null
-                            ArgType.BOOLEAN -> a.equals("true", true) || a.equals("false", true)
-                            ArgType.STRING -> true
-                        }
-                        if (!ok) {
+                        if (methodArgs.size <= v.index || !validateArg(methodArgs[v.index], v.type)) {
                             sender.sendMessage(v.errorMessage)
                             return true
                         }
                     }
 
+                    val params = bindParameters(method, sender, methodArgs)
+
                     if (sender is Player) {
                         method?.getAnnotation(Cooldown::class.java)?.let { cd ->
                             val ctrl = CooldownController.getCooldownController(sender)
                             val key =
-                                cd.key.ifEmpty { "${plugin.name}.${cmdAnn.name}.${match?.joinToString(".") ?: "root"}" }
+                                cd.key.ifEmpty { "${plugin.name}.${cmdAnn.name}.${matchPath?.joinToString(".") ?: "root"}" }
                             if (ctrl.isInCooldown(key)) {
                                 val rem = (ctrl.getCooldown(key) / 1000).coerceAtLeast(1)
                                 sender.sendMessage(cd.message.replace("{time}", rem.toString()))
@@ -114,37 +132,80 @@ object CommandRegister {
                         }
                     }
 
-                    return method?.invoke(handler, sender, methodArgs) as? Boolean ?: false
+                    val metricAnn = method?.getAnnotation(Metric::class.java)
+                    val metricKey = metricAnn?.name.takeIf { !it.isNullOrEmpty() }
+                        ?: "${clazz.simpleName}.${method?.name}"
+                    val start = System.nanoTime()
+
+                    val result = method?.invoke(handler, *params.toTypedArray()) as? Boolean ?: false
+                    val elapsed = System.nanoTime() - start
+                    metricAnn?.let { MetricManager.record(metricKey, elapsed) }
+
+                    return result
                 }
 
                 @Suppress("UNCHECKED_CAST")
                 override fun tabComplete(sender: CommandSender, alias: String, args: Array<String>): List<String> {
                     val argsList = args.toList()
-                    return if (argsList.size <= 1) {
-                        val base = rootTab?.invoke(handler, sender, args) as? List<String>
+
+                    if (argsList.size == 1) {
+                        val rootSuggestions = rootTab?.invoke(handler, sender, args) as? List<String>
                             ?: subExec.keys.map { it[0] }.distinct()
-                        base.filter { seg ->
-                            val allowedRoot = cmdAnn.permission.isEmpty() || sender.hasPermission(cmdAnn.permission)
-                            val allowedSub = subAnn.filterKeys { it[0] == seg }.values.any {
-                                it.permission.isEmpty() || sender.hasPermission(it.permission)
+                        return rootSuggestions.filter { sugg ->
+                            val paths = subExec.keys.filter { it[0] == sugg }
+                            paths.any { path ->
+                                subAnn[path]?.let { sc ->
+                                    sc.permission.isEmpty() || sender.hasPermission(sc.permission)
+                                } ?: true
                             }
-                            allowedRoot && (allowedSub || subAnn.keys.none { it[0] == seg })
                         }
-                    } else {
-                        val match = subExec.keys.sortedByDescending { it.size }
-                            .firstOrNull { path -> argsList.size - 1 >= path.size && argsList.take(path.size) == path }
-                        match?.let { path ->
-                            tabProv[path]?.invoke(
-                                handler,
-                                sender,
-                                argsList.drop(path.size).toTypedArray()
-                            ) as? List<String>
-                        } ?: emptyList()
                     }
+
+                    val matchPath = subExec.keys.sortedByDescending { it.size }
+                        .firstOrNull { path -> argsList.size - 1 >= path.size && argsList.take(path.size) == path }
+                    val provider = matchPath?.let { tabProv[it] } ?: return emptyList()
+                    val subArgs = argsList.drop(matchPath.size).toTypedArray()
+                    return provider.invoke(handler, sender, subArgs) as? List<String> ?: emptyList()
                 }
             }
+
             commandMap.register(plugin.name.lowercase(), bukkitCmd)
         }
+    }
+
+    private fun validateArg(arg: String, type: ArgType): Boolean = when (type) {
+        ArgType.INT -> arg.toIntOrNull() != null
+        ArgType.LONG -> arg.toLongOrNull() != null
+        ArgType.DOUBLE -> arg.toDoubleOrNull() != null
+        ArgType.BOOLEAN -> arg.equals("true", true) || arg.equals("false", true)
+        ArgType.STRING -> true
+    }
+
+    private fun bindParameters(
+        method: Method?, sender: CommandSender, args: Array<String>
+    ): List<Any?> {
+        val params = mutableListOf<Any?>()
+        method?.parameters?.forEachIndexed { _, p ->
+            when {
+                CommandSender::class.java.isAssignableFrom(p.type) -> params.add(sender)
+                p.isAnnotationPresent(Param::class.java) -> {
+                    val pa = p.getAnnotation(Param::class.java)
+                    val raw = args.getOrNull(pa.index) ?: pa.default
+                    val converted = when (pa.type) {
+                        ArgType.INT -> raw.toIntOrNull()
+                        ArgType.LONG -> raw.toLongOrNull()
+                        ArgType.DOUBLE -> raw.toDoubleOrNull()
+                        ArgType.BOOLEAN -> raw.toBooleanStrictOrNull()
+                        ArgType.STRING -> raw
+                    }
+                    params.add(converted)
+                }
+
+                p.type.isArray && p.type.componentType == String::class.java -> params.add(args)
+                else -> params.add(null)
+            }
+        }
+        return params
     }
 
     private fun fetchCommandMap(): CommandMap {
