@@ -5,11 +5,11 @@ import kotlin.coroutines.CoroutineContext
 import org.bukkit.plugin.Plugin
 
 /**
- * Dispatcher que agenda coroutines no scheduler do Bukkit.
+ * Dispatcher que usa BukkitScheduler para dispatch sync/async.
  */
 class BukkitDispatcher(
     private val plugin: Plugin,
-    private val async: Boolean = false
+    private val async: Boolean
 ) : CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         if (async) plugin.server.scheduler.runTaskAsynchronously(plugin, block)
