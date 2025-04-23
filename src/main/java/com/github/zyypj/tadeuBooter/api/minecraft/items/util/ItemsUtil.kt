@@ -4,7 +4,6 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound
 import com.comphenix.protocol.wrappers.nbt.NbtFactory
 import com.github.zyypj.tadeuBooter.api.minecraft.items.ItemFactory
 import com.mojang.authlib.GameProfile
-import com.mojang.authlib.properties.Property
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -12,7 +11,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.util.stream.Collectors
 
 object ItemsUtil {
     private val serverVersion: String
@@ -38,13 +36,9 @@ object ItemsUtil {
     fun serialize(item: ItemStack?): String {
         if (item == null || item.type == Material.AIR) return ""
         return try {
-            val asNms = craftItemStackClass
-                .getMethod("asNMSCopy", ItemStack::class.java)
-                .invoke(null, item)
-            val tag = nmsItemClass
-                .getMethod("getTag")
-                .invoke(asNms)
-                ?: nbtTagCompoundClass.getConstructor().newInstance()
+            val asNms = craftItemStackClass.getMethod("asNMSCopy", ItemStack::class.java).invoke(null, item)
+            val tag =
+                nmsItemClass.getMethod("getTag").invoke(asNms) ?: nbtTagCompoundClass.getConstructor().newInstance()
             tag.toString()
         } catch (e: Exception) {
             throw RuntimeException(e)
@@ -57,12 +51,8 @@ object ItemsUtil {
         return try {
             val parseMethod: Method = mojangsonParserClass.getMethod("a", String::class.java)
             val compound = parseMethod.invoke(null, data)
-            val nmsItem = nmsItemClass
-                .getConstructor(nbtTagCompoundClass)
-                .newInstance(compound)
-            craftItemStackClass
-                .getMethod("asBukkitCopy", nmsItemClass)
-                .invoke(null, nmsItem) as ItemStack
+            val nmsItem = nmsItemClass.getConstructor(nbtTagCompoundClass).newInstance(compound)
+            craftItemStackClass.getMethod("asBukkitCopy", nmsItemClass).invoke(null, nmsItem) as ItemStack
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
