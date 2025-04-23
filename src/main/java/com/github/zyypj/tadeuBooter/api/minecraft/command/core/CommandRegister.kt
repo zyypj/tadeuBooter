@@ -1,9 +1,6 @@
 package com.github.zyypj.tadeuBooter.api.minecraft.command.core
 
-import com.github.zyypj.tadeuBooter.api.minecraft.command.annotation.Command
-import com.github.zyypj.tadeuBooter.api.minecraft.command.annotation.Execute
-import com.github.zyypj.tadeuBooter.api.minecraft.command.annotation.SubCommand
-import com.github.zyypj.tadeuBooter.api.minecraft.command.annotation.TabComplete
+import com.github.zyypj.tadeuBooter.api.minecraft.command.annotation.*
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandMap
 import org.bukkit.command.CommandSender
@@ -15,11 +12,7 @@ import java.lang.reflect.Method
  * Registra comandos manualmente fornecidos como instâncias, usando anotações.
  */
 object CommandRegister {
-    /**
-     * Registra cada handler anotado passado explicitamente.
-     * Exemplo no onEnable:
-     * CommandRegister.registerCommands(this, WarpCommand(), TesteCommand())
-     */
+
     @JvmStatic
     fun registerCommands(plugin: JavaPlugin, vararg handlers: Any) {
         val commandMap = fetchCommandMap()
@@ -28,89 +21,112 @@ object CommandRegister {
             val clazz = handler.javaClass
             val cmdAnn = clazz.getAnnotation(Command::class.java) ?: return@forEach
 
-            val subExec = mutableMapOf<String, Method>()
-            val subAnnotations = mutableMapOf<String, SubCommand>()
+            val subExec = mutableMapOf<List<String>, Method>()
+            val subAnn = mutableMapOf<List<String>, SubCommand>()
             var rootExec: Method? = null
             var rootTab: Method? = null
-            val subTab = mutableMapOf<String, Method>()
+            val tabProviders = mutableMapOf<List<String>, Method>()
 
             clazz.declaredMethods.forEach { m ->
                 m.isAccessible = true
                 if (m.isAnnotationPresent(Execute::class.java)) {
                     val sc = m.getAnnotation(SubCommand::class.java)
                     if (sc != null) {
-                        subExec[sc.name] = m
-                        subAnnotations[sc.name] = sc
+                        val path = sc.path.toList()
+                        subExec[path] = m
+                        subAnn[path] = sc
                     } else rootExec = m
                 }
                 if (m.isAnnotationPresent(TabComplete::class.java)) {
                     val tc = m.getAnnotation(TabComplete::class.java)
-                    if (tc != null) {
-                        if (tc.forSub.isBlank()) rootTab = m
-                        else subTab[tc.forSub] = m
-                    }
+                    val path = tc.path.toList()
+                    if (path.isEmpty()) rootTab = m
+                    else tabProviders[path] = m
                 }
             }
 
-            val bukkitCmd = object : org.bukkit.command.Command(
-                cmdAnn.name, cmdAnn.description, cmdAnn.usage.ifEmpty { "/${cmdAnn.name}" }, cmdAnn.aliases.toList()
+            val bcmd = object : org.bukkit.command.Command(
+                cmdAnn.name, cmdAnn.description,
+                cmdAnn.usage.ifEmpty { "/${cmdAnn.name}" },
+                cmdAnn.aliases.toList()
             ) {
-                override fun execute(
-                    sender: CommandSender, label: String, args: Array<String>
-                ): Boolean {
+                override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
+                    // valida permissão raiz
                     if (cmdAnn.permission.isNotEmpty() && !sender.hasPermission(cmdAnn.permission)) {
                         sender.sendMessage(cmdAnn.permissionMessage)
                         return true
                     }
 
-                    val subName = args.getOrNull(0)
-                    val method = if (subName != null && subExec.containsKey(subName)) subExec[subName] else rootExec
-                    val methodArgs = if (subExec.containsKey(subName)) args.drop(1).toTypedArray() else args
-                    if (subName != null && subAnnotations.containsKey(subName)) {
-                        val scAnn = subAnnotations[subName]!!
-                        if (scAnn.permission.isNotEmpty() && !sender.hasPermission(scAnn.permission)) {
-                            sender.sendMessage(scAnn.permissionMessage)
+                    val argsList = args.toList()
+                    val match = subExec.keys
+                        .sortedByDescending { it.size }
+                        .firstOrNull { path -> argsList.size >= path.size && argsList.take(path.size) == path }
+
+                    // checa permissão do sub
+                    match?.let { path ->
+                        subAnn[path]?.let { sc ->
+                            if (sc.permission.isNotEmpty() && !sender.hasPermission(sc.permission)) {
+                                sender.sendMessage(sc.permissionMessage)
+                                return true
+                            }
+                        }
+                    }
+
+                    val method = match?.let { subExec[it] } ?: rootExec
+                    val methodArgs = match?.size?.let { argsList.drop(it).toTypedArray() } ?: args
+
+                    // validações via @Validate
+                    method?.getAnnotationsByType(Validate::class.java)?.forEach { v ->
+                        if (methodArgs.size <= v.index) {
+                            sender.sendMessage(v.errorMessage)
+                            return true
+                        }
+                        val a = methodArgs[v.index]
+                        val ok = when (v.type) {
+                            ArgType.INT -> a.toIntOrNull() != null
+                            ArgType.LONG -> a.toLongOrNull() != null
+                            ArgType.DOUBLE -> a.toDoubleOrNull() != null
+                            ArgType.BOOLEAN -> a.equals("true", true) || a.equals("false", true)
+                            ArgType.STRING -> true
+                        }
+                        if (!ok) {
+                            sender.sendMessage(v.errorMessage)
                             return true
                         }
                     }
 
-                    return invokeCommand(method, handler, sender, methodArgs)
+                    return method?.invoke(handler, sender, methodArgs) as? Boolean ?: false
                 }
 
-                override fun tabComplete(
-                    sender: CommandSender, alias: String, args: Array<String>
-                ): List<String> {
-                    return if (args.size <= 1) {
-                        val suggestions = rootTab?.let {
-                            invokeTab(it, handler, sender, args)
-                        } ?: subExec.keys.toList()
-
-                        suggestions.filter { name ->
-                            if (subAnnotations.containsKey(name)) {
-                                val scAnn = subAnnotations[name]!!
-                                scAnn.permission.isEmpty() || sender.hasPermission(scAnn.permission)
-                            } else true
+                @Suppress("UNCHECKED_CAST")
+                override fun tabComplete(sender: CommandSender, alias: String, args: Array<String>): List<String> {
+                    val argsList = args.toList()
+                    return if (argsList.size <= 1) {
+                        val base = rootTab?.invoke(handler, sender, args) as? List<String>
+                            ?: subExec.keys.map { it[0] }.distinct()
+                        base.filter { seg ->
+                            subAnn.filterKeys { it[0] == seg }.any { (_, sc) ->
+                                sc.permission.isEmpty() || sender.hasPermission(sc.permission)
+                            } || cmdAnn.permission.isEmpty() || sender.hasPermission(cmdAnn.permission)
                         }
                     } else {
-                        val subName = args[0]
-                        val method = subTab[subName]
-                        invokeTab(method, handler, sender, args.drop(1).toTypedArray())
+                        val match = subExec.keys
+                            .sortedByDescending { it.size }
+                            .firstOrNull { path -> argsList.size - 1 >= path.size && argsList.take(path.size) == path }
+                        match?.let { path ->
+                            tabProviders[path]?.invoke(
+                                handler,
+                                sender,
+                                argsList.drop(path.size).toTypedArray()
+                            ) as? List<String>
+                        } ?: emptyList()
                     }
                 }
             }
 
-            commandMap.register(plugin.name.lowercase(), bukkitCmd)
+            commandMap.register(plugin.name.lowercase(), bcmd)
         }
     }
-
-    private fun invokeCommand(
-        method: Method?, instance: Any, sender: CommandSender, args: Array<String>
-    ): Boolean = method?.invoke(instance, sender, args) as? Boolean ?: false
-
-    @Suppress("UNCHECKED_CAST")
-    private fun invokeTab(
-        method: Method?, instance: Any, sender: CommandSender, args: Array<String>
-    ): List<String> = method?.invoke(instance, sender, args) as? List<String> ?: emptyList()
 
     private fun fetchCommandMap(): CommandMap {
         val pm = Bukkit.getPluginManager()
