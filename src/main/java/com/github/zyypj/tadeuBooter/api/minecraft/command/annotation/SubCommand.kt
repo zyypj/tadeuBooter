@@ -12,7 +12,7 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 @Target(FUNCTION)
 @Retention(RUNTIME)
 annotation class SubCommand(
-    val name: String,
+    val path: Array<String>,
     val permission: String = "",
-    val permissionMessage: String = "§cYou don’t have permission to use this subcommand."
+    val permissionMessage: String = "§4§lERRO! §cVocê não tem permissão para isso."
 )

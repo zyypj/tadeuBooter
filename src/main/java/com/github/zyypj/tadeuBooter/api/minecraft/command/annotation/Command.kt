@@ -20,5 +20,5 @@ annotation class Command(
     val usage: String = "",
     val aliases: Array<String> = [],
     val permission: String = "",
-    val permissionMessage: String = "§cYou don’t have permission to use this command."
+    val permissionMessage: String = "§cVocê não tem permissão para usar este comando."
 )

@@ -4,11 +4,10 @@ import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FUNCTION
 
 /**
- * Marca um método como provedor de tab-complete.
- * @property forSub  Nome do subcomando que este provider atende ("" = raiz)
+ * Provedor de tab-complete para caminho hierárquico.
  */
 @Target(FUNCTION)
 @Retention(RUNTIME)
 annotation class TabComplete(
-    val forSub: String = ""
+    val path: Array<String> = []
 )
