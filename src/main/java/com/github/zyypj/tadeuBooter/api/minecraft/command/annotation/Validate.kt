@@ -17,5 +17,5 @@ import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 annotation class Validate(
     val index: Int,
     val type: ArgType,
-    val errorMessage: String = "Argumento inválido"
+    val errorMessage: String = "§cArgumento inválido"
 )
