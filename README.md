@@ -4,9 +4,22 @@ Para instruções detalhadas sobre como adicionar o **TadeuBooter** ao seu proje
 ## Contribuições e Feedback
 Contribuições são bem-vindas! Se encontrar problemas ou tiver sugestões de melhorias, sinta-se à vontade para abrir uma [issue](https://github.com/zyypj/tadeuBooter/issues) ou enviar um [pull request](https://github.com/zyypj/tadeuBooter/pulls).
 
+## Estilo de Código e Formatação
+Este projeto utiliza [Spotless](https://github.com/diffplug/spotless) para manter a consistência do código. 
+
+Para verificar se seu código está formatado corretamente:
+```bash
+./gradlew spotlessCheck
+```
+
+Para aplicar a formatação automaticamente:
+```bash
+./gradlew spotlessApply
+```
+
 ## Agradecimentos
 
-Obrigado ao [**syncwrld**](https://github.com/syncwrld) pela disponibilidade de alguns códigos.
+Obrigado ao [**syncwrld**](https://github.com/syncwrld) pela disponibilidade da base do booter e de alguns códigos.
 
 ---
 
