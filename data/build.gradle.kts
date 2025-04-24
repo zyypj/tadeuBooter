@@ -1,6 +1,7 @@
 plugins {
     java
     kotlin("jvm") version "2.1.20"
+    id("com.diffplug.spotless")
 }
 
 group = "me.zyypj.booter.data"
@@ -24,16 +25,12 @@ dependencies {
 val targetJavaVersion = JavaVersion.VERSION_1_8
 
 java {
-    if (JavaVersion.current() < targetJavaVersion) {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(8))
-    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-    if (targetJavaVersion.isJava10Compatible || JavaVersion.current().isJava10Compatible) {
-        options.release.set(8)
-    }
+    options.compilerArgs.addAll(listOf("-source", "1.8", "-target", "1.8"))
 }
 
 tasks.processResources {
