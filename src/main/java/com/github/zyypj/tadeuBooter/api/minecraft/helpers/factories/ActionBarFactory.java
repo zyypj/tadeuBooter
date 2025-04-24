@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.util.Collection;
 
-
 public class ActionBarFactory {
 
     private final ProtocolManager protocolManager;

@@ -16,6 +16,7 @@ object MetricManager {
     private data class Stat(var count: Long = 0, var totalNanos: Long = 0)
 
     private val stats = ConcurrentHashMap<String, Stat>()
+
     fun record(key: String, nanos: Long) {
         stats.compute(key) { _, st ->
             val s = st ?: Stat()
@@ -30,6 +31,7 @@ object MetricManager {
 }
 
 object CommandRegister {
+
     @JvmStatic
     fun registerCommands(plugin: JavaPlugin, vararg handlers: Any) {
         val commandMap = fetchCommandMap()
@@ -67,6 +69,7 @@ object CommandRegister {
                 cmdAnn.usage.ifEmpty { "/${cmdAnn.name}" },
                 cmdAnn.aliases.toList()
             ) {
+
                 override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
                     val argsList = args.toList()
 
