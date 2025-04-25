@@ -36,10 +36,15 @@ jobs:
       - name: Executar testes
         run: ./gradlew test
 
-      - name: Extrair versão do build.gradle
+      - name: Extrair versão do módulo shared
         id: get_version
         run: |
-          VERSION=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          # Busca a linha version = "x.y.z" dentro de shared/build.gradle.kts
+          VERSION=$(
+            grep -E '^\s*version\s*=\s*".*"' shared/build.gradle.kts \
+            | head -1 \
+            | sed -E 's/.*version\s*=\s*"(.+)".*/\1/'
+          )
           echo "$VERSION" > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
