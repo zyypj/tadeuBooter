@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "me.zyypj.booter.shared"
-version = "1.8.1"
+version = "1.9"
 
 repositories {
     mavenCentral()
