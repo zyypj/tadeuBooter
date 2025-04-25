@@ -30,6 +30,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+kotlin {
+    sourceSets["main"].kotlin.srcDirs("src/main/java", "src/main/kotlin")
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.addAll(listOf("-source", "1.8", "-target", "1.8"))
 }

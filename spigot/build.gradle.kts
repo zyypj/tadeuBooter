@@ -44,6 +44,10 @@ dependencies {
 
 val targetJavaVersion = JavaVersion.VERSION_1_8
 
+kotlin {
+    sourceSets["main"].kotlin.srcDirs("src/main/java", "src/main/kotlin")
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
