@@ -74,47 +74,45 @@ class ItemFactory {
 
     /** Define o dono de cabeça de jogador pelo nome (owner). */
     fun setSkullOwner(owner: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.let { skullMeta ->
+        (itemMeta as? SkullMeta)?.also { skullMeta ->
             try {
-                val mModern: Method = skullMeta.javaClass.getMethod(
-                    "setOwningPlayer", OfflinePlayer::class.java
-                )
-                mModern.invoke(skullMeta, Bukkit.getOfflinePlayer(owner))
-            } catch (e1: NoSuchMethodException) {
+                val craftClass = skullMeta.javaClass
+                val mOwner: Method = craftClass.getDeclaredMethod("setOwner", String::class.java)
+                mOwner.isAccessible = true
+                mOwner.invoke(skullMeta, owner)
+            } catch (e1: Exception) {
                 try {
-                    val mLegacy: Method = skullMeta.javaClass.getMethod(
-                        "setOwner", String::class.java
-                    )
-                    mLegacy.invoke(skullMeta, owner)
-                } catch (e2: NoSuchMethodException) {
-                    try {
-                        val f: Field = skullMeta.javaClass.getDeclaredField("owner")
-                        f.isAccessible = true
-                        f.set(skullMeta, owner)
-                    } catch (_: Exception) {
-                    }
+                    val fOwner: Field = skullMeta.javaClass.getDeclaredField("owner")
+                    fOwner.isAccessible = true
+                    fOwner.set(skullMeta, owner)
+                } catch (_: Exception) {
                 }
             }
             itemMeta = skullMeta
         }
     }
 
-    /** Define o valor de textura de cabeça via GameProfile. */
-    fun setSkullValue(value: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.let { skullMeta ->
+    /**
+     * Define textura customizada via Base64 (JWT) usando reflexão em GameProfile.
+     */
+    fun setSkullValue(base64: String): ItemFactory = apply {
+        (itemMeta as? SkullMeta)?.also { skullMeta ->
             val profile = GameProfile(UUID.randomUUID(), null).apply {
-                properties.put("textures", Property("textures", value))
+                properties.put("textures", Property("textures", base64))
             }
-            var clazz: Class<*>? = skullMeta.javaClass
-            while (clazz != null) {
-                try {
-                    val field: Field = clazz.getDeclaredField("profile")
-                    field.isAccessible = true
-                    field.set(skullMeta, profile)
-                    break
-                } catch (_: NoSuchFieldException) {
-                    clazz = clazz.superclass
+            try {
+                var clazz: Class<*>? = skullMeta.javaClass
+                while (clazz != null) {
+                    try {
+                        val fProfile: Field = clazz.getDeclaredField("profile")
+                        fProfile.isAccessible = true
+                        fProfile.set(skullMeta, profile)
+                        break
+                    } catch (_: NoSuchFieldException) {
+                        clazz = clazz.superclass
+                    }
                 }
+            } catch (_: Exception) {
             }
             itemMeta = skullMeta
         }
