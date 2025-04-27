@@ -2,18 +2,15 @@ package me.zyypj.booter.minecraft.spigot.factories
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
-import org.bukkit.Bukkit
+import me.zyypj.booter.shared.reflection.ReflectionHelper
 import org.bukkit.Color
 import org.bukkit.Material
-import org.bukkit.OfflinePlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
-import java.lang.reflect.Field
-import java.lang.reflect.Method
 import java.util.*
 
 /**
@@ -76,16 +73,20 @@ class ItemFactory {
     fun setSkullOwner(owner: String): ItemFactory = apply {
         (itemMeta as? SkullMeta)?.also { skullMeta ->
             try {
-                val craftClass = skullMeta.javaClass
-                val mOwner: Method = craftClass.getDeclaredMethod("setOwner", String::class.java)
-                mOwner.isAccessible = true
-                mOwner.invoke(skullMeta, owner)
-            } catch (e1: Exception) {
+                skullMeta.owner = owner
+            } catch (e: NoSuchMethodError) {
                 try {
-                    val fOwner: Field = skullMeta.javaClass.getDeclaredField("owner")
-                    fOwner.isAccessible = true
-                    fOwner.set(skullMeta, owner)
+                    ReflectionHelper.invokeMethod(
+                        skullMeta,
+                        "setOwner",
+                        arrayOf(String::class.java),
+                        owner
+                    )
                 } catch (_: Exception) {
+                    try {
+                        ReflectionHelper.setFieldValue(skullMeta, "owner", owner)
+                    } catch (_: Exception) {
+                    }
                 }
             }
             itemMeta = skullMeta
@@ -101,17 +102,7 @@ class ItemFactory {
                 properties.put("textures", Property("textures", base64))
             }
             try {
-                var clazz: Class<*>? = skullMeta.javaClass
-                while (clazz != null) {
-                    try {
-                        val fProfile: Field = clazz.getDeclaredField("profile")
-                        fProfile.isAccessible = true
-                        fProfile.set(skullMeta, profile)
-                        break
-                    } catch (_: NoSuchFieldException) {
-                        clazz = clazz.superclass
-                    }
-                }
+                ReflectionHelper.setFieldValue(skullMeta, "profile", profile)
             } catch (_: Exception) {
             }
             itemMeta = skullMeta
