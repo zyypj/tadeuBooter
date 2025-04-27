@@ -5,3 +5,5 @@ rootDir.walkTopDown()
     .filter { dir -> dir.listFiles()?.any { it.name == "build.gradle.kts" } == true }
     .map { it.toRelativeString(rootDir).replace(File.separatorChar, ':') }
     .forEach { include(it) }
+
+include("shared", "data", "spigot")

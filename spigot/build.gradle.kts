@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("jvm") version "2.1.20"
-    id("com.diffplug.spotless")
+    id("com.diffplug.spotless") version "6.13.0"
 }
 
 group = "me.zyypj.booter.minecraft.spigot"
@@ -40,6 +40,7 @@ dependencies {
     implementation("org.reflections:reflections:0.10.2")
 
     implementation(project(":shared"))
+    implementation(project(":data"))
 }
 
 val targetJavaVersion = JavaVersion.VERSION_1_8
