@@ -2,18 +2,15 @@ package me.zyypj.booter.minecraft.spigot.factories
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
-import org.bukkit.Bukkit
+import me.zyypj.booter.shared.reflection.ReflectionHelper
 import org.bukkit.Color
 import org.bukkit.Material
-import org.bukkit.OfflinePlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
-import java.lang.reflect.Field
-import java.lang.reflect.Method
 import java.util.*
 
 /**
@@ -74,23 +71,20 @@ class ItemFactory {
 
     /** Define o dono de cabeça de jogador pelo nome (owner). */
     fun setSkullOwner(owner: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.let { skullMeta ->
+        (itemMeta as? SkullMeta)?.also { skullMeta ->
             try {
-                val mModern: Method = skullMeta.javaClass.getMethod(
-                    "setOwningPlayer", OfflinePlayer::class.java
-                )
-                mModern.invoke(skullMeta, Bukkit.getOfflinePlayer(owner))
-            } catch (e1: NoSuchMethodException) {
+                skullMeta.owner = owner
+            } catch (e: NoSuchMethodError) {
                 try {
-                    val mLegacy: Method = skullMeta.javaClass.getMethod(
-                        "setOwner", String::class.java
+                    ReflectionHelper.invokeMethod(
+                        skullMeta,
+                        "setOwner",
+                        arrayOf(String::class.java),
+                        owner
                     )
-                    mLegacy.invoke(skullMeta, owner)
-                } catch (e2: NoSuchMethodException) {
+                } catch (_: Exception) {
                     try {
-                        val f: Field = skullMeta.javaClass.getDeclaredField("owner")
-                        f.isAccessible = true
-                        f.set(skullMeta, owner)
+                        ReflectionHelper.setFieldValue(skullMeta, "owner", owner)
                     } catch (_: Exception) {
                     }
                 }
@@ -99,22 +93,17 @@ class ItemFactory {
         }
     }
 
-    /** Define o valor de textura de cabeça via GameProfile. */
-    fun setSkullValue(value: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.let { skullMeta ->
+    /**
+     * Define textura customizada via Base64 (JWT) usando reflexão em GameProfile.
+     */
+    fun setSkullValue(base64: String): ItemFactory = apply {
+        (itemMeta as? SkullMeta)?.also { skullMeta ->
             val profile = GameProfile(UUID.randomUUID(), null).apply {
-                properties.put("textures", Property("textures", value))
+                properties.put("textures", Property("textures", base64))
             }
-            var clazz: Class<*>? = skullMeta.javaClass
-            while (clazz != null) {
-                try {
-                    val field: Field = clazz.getDeclaredField("profile")
-                    field.isAccessible = true
-                    field.set(skullMeta, profile)
-                    break
-                } catch (_: NoSuchFieldException) {
-                    clazz = clazz.superclass
-                }
+            try {
+                ReflectionHelper.setFieldValue(skullMeta, "profile", profile)
+            } catch (_: Exception) {
             }
             itemMeta = skullMeta
         }

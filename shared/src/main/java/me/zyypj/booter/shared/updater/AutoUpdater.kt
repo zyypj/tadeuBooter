@@ -59,8 +59,7 @@ class AutoUpdater(
      * Compara a versão local com a versão disponível.
      * A comparação é *case‑insensitive* e sem análise semântica.
      */
-    private fun isUpToDate(latestVersion: String): Boolean =
-        currentVersion.equals(latestVersion, ignoreCase = true)
+    private fun isUpToDate(latestVersion: String): Boolean = currentVersion.equals(latestVersion, ignoreCase = true)
 
     /**
      * Faz o download do novo JAR para o mesmo diretório do plugin, com prefixo "update-".
