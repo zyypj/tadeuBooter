@@ -1,6 +1,5 @@
 package me.zyypj.booter.minecraft.spigot.command.core
 
-import Cooldown
 import me.zyypj.booter.minecraft.spigot.command.annotation.*
 import me.zyypj.booter.minecraft.spigot.cooldown.CooldownController
 import org.bukkit.Bukkit
