@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "me.zyypj.booter.minecraft.spigot"
-version = "1.9"
+version = "1.9.1"
 
 repositories {
     mavenCentral()
