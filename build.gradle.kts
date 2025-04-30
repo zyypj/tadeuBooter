@@ -83,20 +83,20 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
-    format("misc") {
-        target("**/*.md", "**/*.gradle.kts", "**/*.gradle")
-        trimTrailingWhitespace()
-        endWithNewline()
-    }
+//    format("misc") {
+//        target("**/*.md", "**/*.gradle.kts", "**/*.gradle")
+//        trimTrailingWhitespace()
+//        endWithNewline()
+//    }
 }
 
 tasks {
     named<ShadowJar>("shadowJar") {
         archiveBaseName.set("tadeuBooter")
-        archiveClassifier.set("") // remove o "-all"
+        archiveClassifier.set("")
         from(project(":shared").sourceSets["main"].output)
         from(project(":data").sourceSets["main"].output)
-        from(project(":spigot   ").sourceSets["main"].output)
+        from(project(":spigot").sourceSets["main"].output)
         configurations = listOf(project.configurations.runtimeClasspath.get())
     }
 
