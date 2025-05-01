@@ -1,8 +1,8 @@
 package me.zyypj.booter.minecraft.spigot.factories
 
-import com.mojang.authlib.GameProfile
-import com.mojang.authlib.properties.Property
-import me.zyypj.booter.shared.reflection.ReflectionHelper
+import com.cryptomorin.xseries.profiles.builder.XSkull
+import com.cryptomorin.xseries.profiles.objects.Profileable
+import com.cryptomorin.xseries.profiles.objects.ProfileInputType
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -11,13 +11,12 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
-import java.util.*
 
 /**
- * Constrói e customiza ItemStacks de forma fluente.
+ * Constrói e customiza ItemStacks de forma fluente, com suporte a skulls em múltiplas versões via XSeries.
  */
 class ItemFactory {
-    val item: ItemStack
+    private var item: ItemStack
     private var itemMeta: ItemMeta
 
     /**
@@ -50,16 +49,16 @@ class ItemFactory {
     }
 
     /** Adiciona um enchant normal. */
-    fun addEnchant(enchantment: Enchantment, level: Int): ItemFactory = apply {
-        itemMeta.addEnchant(enchantment, level, true)
+    fun addEnchant(enchant: Enchantment, level: Int): ItemFactory = apply {
+        itemMeta.addEnchant(enchant, level, true)
     }
 
     /** Adiciona um enchant inseguro direto no ItemStack. */
-    fun addUnsafeEnchant(enchantment: Enchantment, level: Int): ItemFactory = apply {
-        item.addUnsafeEnchantment(enchantment, level)
+    fun addUnsafeEnchant(enchant: Enchantment, level: Int): ItemFactory = apply {
+        item.addUnsafeEnchantment(enchant, level)
     }
 
-    /** Define o lore via array de Strings. */
+    /** Define o lore via vararg de Strings. */
     fun setLore(vararg lore: String): ItemFactory = apply {
         itemMeta.lore = lore.map { it.replace("&", "§") }
     }
@@ -69,49 +68,30 @@ class ItemFactory {
         itemMeta.lore = lore.map { it.replace("&", "§") }
     }
 
-    /** Define o dono de cabeça de jogador pelo nome (owner). */
+    /**
+     * Define o dono da skull por nome de usuário, usando XSeries ProfileInstruction.
+     */
     fun setSkullOwner(owner: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.also { skullMeta ->
-            try {
-                skullMeta.owner = owner
-            } catch (e: NoSuchMethodError) {
-                try {
-                    ReflectionHelper.invokeMethod(
-                        skullMeta,
-                        "setOwner",
-                        arrayOf(String::class.java),
-                        owner
-                    )
-                } catch (_: Exception) {
-                    try {
-                        ReflectionHelper.setFieldValue(skullMeta, "owner", owner)
-                    } catch (_: Exception) {
-                    }
-                }
-            }
-            itemMeta = skullMeta
-        }
+        XSkull.of(item)
+            .profile(Profileable.username(owner))
+            .apply()
+        itemMeta = item.itemMeta as SkullMeta
     }
 
     /**
-     * Define textura customizada via Base64 (JWT) usando reflexão em GameProfile.
+     * Define textura customizada via valor Base64, usando XSeries ProfileInstruction.
      */
     fun setSkullValue(base64: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.also { skullMeta ->
-            val profile = GameProfile(UUID.randomUUID(), null).apply {
-                properties.put("textures", Property("textures", base64))
-            }
-            try {
-                ReflectionHelper.setFieldValue(skullMeta, "profile", profile)
-            } catch (_: Exception) {
-            }
-            itemMeta = skullMeta
-        }
+        XSkull.of(item)
+            .profile(Profileable.of(ProfileInputType.BASE64, base64))
+            .apply()
+        itemMeta = item.itemMeta as SkullMeta
     }
 
     /** Altera o Material do ItemStack. */
     fun setMaterial(material: Material): ItemFactory = apply {
         item.type = material
+        itemMeta = item.itemMeta!!
     }
 
     /** Define o data/durability como short. */
@@ -131,9 +111,7 @@ class ItemFactory {
 
     /** Define cor em armadura de couro. */
     fun setLeatherColor(color: Color): ItemFactory = apply {
-        if (itemMeta is LeatherArmorMeta) {
-            (itemMeta as LeatherArmorMeta).color = color
-        }
+        (itemMeta as? LeatherArmorMeta)?.color = color
     }
 
     /** Constrói e retorna o ItemStack. */
