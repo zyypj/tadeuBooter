@@ -4,8 +4,8 @@ plugins {
     id("com.diffplug.spotless")
 }
 
-group = "me.zyypj.booter.data"
-version = "1.9.1"
+group = rootProject.group
+version = rootProject.version
 
 repositories {
     mavenCentral()
