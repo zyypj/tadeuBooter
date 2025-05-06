@@ -36,14 +36,19 @@ jobs:
       - name: Executar testes
         run: ./gradlew test
 
-      - name: Extrair versão do módulo shared
+      - name: Extrair versão do build.gradle.kts raiz
         id: get_version
         run: |
+          # Procura `version = "x.y.z"` no build.gradle.kts do root
           VERSION=$(
-            grep -E '^\s*version\s*=\s*".*"' shared/build.gradle.kts \
+            grep -E '^\s*version\\s*=\\s*".*"' build.gradle.kts \
             | head -1 \
-            | sed -E 's/.*version\s*=\s*"(.+)".*/\1/'
+            | sed -E 's/.*version\\s*=\\s*"(.*)".*/\\1/'
           )
+          if [ -z "$VERSION" ]; then
+            echo "##[error]Não foi possível extrair a versão de build.gradle.kts"
+            exit 1
+          fi
           echo "$VERSION" > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
