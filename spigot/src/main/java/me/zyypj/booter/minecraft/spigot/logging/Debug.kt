@@ -11,7 +11,8 @@ import org.bukkit.plugin.java.JavaPlugin
 object Debug {
 
     private var plugin: JavaPlugin? = null
-    private var prefix: String = "§8§l[DEBUG] §f"
+    private var debugPrefix: String = "§8§l[DEBUG] §f"
+    private var prefix: String = "§7[Booter] §f"
 
     /**
      * Define o plugin que será usado para obter configurações de debug.
@@ -24,13 +25,23 @@ object Debug {
     }
 
     /**
-     * Configura o prefixo aplicado apenas em mensagens de debug.
+     * Configura o prefixo aplicado em todas mensagens.
      *
      * @param newPrefix Texto de prefixo com códigos ‘&’ para cores.
      */
     @JvmStatic
     fun setPrefix(newPrefix: String) {
         prefix = ChatColor.translateAlternateColorCodes('&', newPrefix)
+    }
+
+    /**
+     * Configura o prefixo aplicado apenas em mensagens de debug.
+     *
+     * @param newPrefix Texto de prefixo com códigos ‘&’ para cores.
+     */
+    @JvmStatic
+    fun setDebugPrefix(newPrefix: String) {
+        debugPrefix = ChatColor.translateAlternateColorCodes('&', newPrefix)
     }
 
     /**
@@ -55,10 +66,10 @@ object Debug {
 
         if (debug) {
             if (pluginInstance.config.getBoolean("debug", true)) {
-                Bukkit.getConsoleSender().sendMessage(prefix + translated)
+                Bukkit.getConsoleSender().sendMessage(debugPrefix + translated)
             }
         } else {
-            Bukkit.getConsoleSender().sendMessage(translated)
+            Bukkit.getConsoleSender().sendMessage(prefix + translated)
         }
     }
 }

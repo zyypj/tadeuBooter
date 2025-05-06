@@ -1,47 +1,45 @@
-package me.zyypj.booter.minecraft.spigot.factories
+package me.zyypj.booter.minecraft.spigot.factories;
 
-import com.mojang.authlib.GameProfile
-import com.mojang.authlib.properties.Property
-import me.zyypj.booter.shared.reflection.ReflectionHelper
-import org.bukkit.Color
-import org.bukkit.Material
-import org.bukkit.enchantments.Enchantment
-import org.bukkit.inventory.ItemFlag
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
-import org.bukkit.inventory.meta.LeatherArmorMeta
-import org.bukkit.inventory.meta.SkullMeta
-import java.util.*
+import com.cryptomorin.xseries.profiles.builder.XSkull;
+import com.cryptomorin.xseries.profiles.objects.Profileable;
+import com.cryptomorin.xseries.profiles.objects.ProfileInputType;
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
-/**
- * Constrói e customiza ItemStacks de forma fluente.
+/*
+ * Fluent factory for constructing and customizing ItemStacks,
+ * including skull handling via XSeries for cross-version support.
  */
-class ItemFactory {
-    val item: ItemStack
-    private var itemMeta: ItemMeta
+class ItemFactory(material: Material) {
+    /* Base ItemStack constructed from provided Material */
+    var item: ItemStack = ItemStack(material)
+        private set
+    /* Metadata for modifications before building final ItemStack */
+    var itemMeta: ItemMeta = item.itemMeta!!
+        private set
 
-    /**
-     * Cria o factory com um Material.
-     */
-    constructor(material: Material) {
-        item = ItemStack(material)
-        itemMeta = item.itemMeta!!
-    }
-
-    /**
-     * @deprecated Use o construtor com Material.
+    /*
+     * @deprecated Use constructor(material: Material) instead
+     * Constructor by type ID is deprecated in favor of Material reference.
      */
     @Deprecated("Use constructor(material: Material) instead")
     constructor(typeId: Int) : this(
-        Material.getMaterial(typeId) ?: throw IllegalArgumentException("Material id $typeId not found")
+        Material.getMaterial(typeId)
+            ?: throw IllegalArgumentException("Material id $typeId not found")
     )
 
-    /** Define o nome (displayName) do ItemStack. */
+    /* Sets the display name, translating '&' color codes to '§' */
     fun setName(name: String): ItemFactory = apply {
         itemMeta.displayName = name.replace("&", "§")
     }
 
-    /** Adiciona brilho (glow) sem enchant visível. */
+    /* Adds a glow effect without visible enchantment */
     fun setGlow(glow: Boolean): ItemFactory = apply {
         if (glow) {
             itemMeta.addEnchant(Enchantment.LUCK, 1, true)
@@ -49,94 +47,77 @@ class ItemFactory {
         }
     }
 
-    /** Adiciona um enchant normal. */
-    fun addEnchant(enchantment: Enchantment, level: Int): ItemFactory = apply {
-        itemMeta.addEnchant(enchantment, level, true)
+    /* Adds a safe enchantment to the item meta */
+    fun addEnchant(enchant: Enchantment, level: Int): ItemFactory = apply {
+        itemMeta.addEnchant(enchant, level, true)
     }
 
-    /** Adiciona um enchant inseguro direto no ItemStack. */
-    fun addUnsafeEnchant(enchantment: Enchantment, level: Int): ItemFactory = apply {
-        item.addUnsafeEnchantment(enchantment, level)
+    /* Adds an unsafe enchantment directly to the ItemStack */
+    fun addUnsafeEnchant(enchant: Enchantment, level: Int): ItemFactory = apply {
+        item.addUnsafeEnchantment(enchant, level)
     }
 
-    /** Define o lore via array de Strings. */
+    /* Sets lore from vararg strings, translating color codes */
     fun setLore(vararg lore: String): ItemFactory = apply {
         itemMeta.lore = lore.map { it.replace("&", "§") }
     }
 
-    /** Define o lore via lista de Strings. */
+    /* Sets lore from a List of Strings */
     fun setLore(lore: List<String>): ItemFactory = apply {
         itemMeta.lore = lore.map { it.replace("&", "§") }
     }
 
-    /** Define o dono de cabeça de jogador pelo nome (owner). */
+    /*
+     * Sets skull owner by username using XSeries,
+     * updating itemMeta to SkullMeta after applying profile.
+     */
     fun setSkullOwner(owner: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.also { skullMeta ->
-            try {
-                skullMeta.owner = owner
-            } catch (e: NoSuchMethodError) {
-                try {
-                    ReflectionHelper.invokeMethod(
-                        skullMeta,
-                        "setOwner",
-                        arrayOf(String::class.java),
-                        owner
-                    )
-                } catch (_: Exception) {
-                    try {
-                        ReflectionHelper.setFieldValue(skullMeta, "owner", owner)
-                    } catch (_: Exception) {
-                    }
-                }
-            }
-            itemMeta = skullMeta
-        }
+        XSkull.of(item)
+            .profile(Profileable.username(owner))
+            .apply()
+        itemMeta = item.itemMeta as SkullMeta
     }
 
-    /**
-     * Define textura customizada via Base64 (JWT) usando reflexão em GameProfile.
+    /*
+     * Sets custom skull texture via Base64 value using XSeries,
+     * then updates itemMeta to SkullMeta.
      */
     fun setSkullValue(base64: String): ItemFactory = apply {
-        (itemMeta as? SkullMeta)?.also { skullMeta ->
-            val profile = GameProfile(UUID.randomUUID(), null).apply {
-                properties.put("textures", Property("textures", base64))
-            }
-            try {
-                ReflectionHelper.setFieldValue(skullMeta, "profile", profile)
-            } catch (_: Exception) {
-            }
-            itemMeta = skullMeta
-        }
+        XSkull.of(item)
+            .profile(Profileable.of(ProfileInputType.BASE64, base64))
+            .apply()
+        itemMeta = item.itemMeta as SkullMeta
     }
 
-    /** Altera o Material do ItemStack. */
+    /* Changes the Material of the item, refreshing itemMeta */
     fun setMaterial(material: Material): ItemFactory = apply {
         item.type = material
+        itemMeta = item.itemMeta!!
     }
 
-    /** Define o data/durability como short. */
+    /* Sets raw durability/data as a short value */
     fun setData(data: Short): ItemFactory = apply {
         item.durability = data
     }
 
-    /** Define a durabilidade (durability) via Int. */
+    /* Sets durability (damage) level from an Int */
     fun setDurability(durability: Int): ItemFactory = apply {
         item.durability = durability.toShort()
     }
 
-    /** Adiciona flags de item. */
+    /* Adds one or more item flags */
     fun addItemFlags(vararg flags: ItemFlag): ItemFactory = apply {
         itemMeta.addItemFlags(*flags)
     }
 
-    /** Define cor em armadura de couro. */
+    /* Sets leather armor color if meta is LeatherArmorMeta */
     fun setLeatherColor(color: Color): ItemFactory = apply {
-        if (itemMeta is LeatherArmorMeta) {
-            (itemMeta as LeatherArmorMeta).color = color
-        }
+        (itemMeta as? LeatherArmorMeta)?.color = color
     }
 
-    /** Constrói e retorna o ItemStack. */
+    /*
+     * Applies all meta changes and returns the final ItemStack.
+     */
     fun build(): ItemStack {
         item.itemMeta = itemMeta
         return item

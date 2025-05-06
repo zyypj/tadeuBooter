@@ -4,8 +4,8 @@ plugins {
     id("com.diffplug.spotless") version "6.13.0"
 }
 
-group = "me.zyypj.booter.minecraft.spigot"
-version = "1.9.1"
+group = rootProject.group
+version = rootProject.version
 
 repositories {
     mavenCentral()
@@ -38,6 +38,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
     implementation("org.reflections:reflections:0.10.2")
+    implementation("com.github.cryptomorin:XSeries:13.2.0")
 
     implementation(project(":shared"))
     implementation(project(":data"))
