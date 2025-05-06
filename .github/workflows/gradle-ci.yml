@@ -39,7 +39,6 @@ jobs:
       - name: Extrair versão do módulo shared
         id: get_version
         run: |
-          # Busca a linha version = "x.y.z" dentro de shared/build.gradle.kts
           VERSION=$(
             grep -E '^\s*version\s*=\s*".*"' shared/build.gradle.kts \
             | head -1 \
@@ -78,7 +77,7 @@ jobs:
       - name: Definir variável de versão
         run: echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
 
-      - name: Criar e enviar tag sem o 'v'
+      - name: Criar e enviar tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -117,4 +116,3 @@ jobs:
             ${{ steps.commits.outputs.commit_list }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
