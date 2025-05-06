@@ -78,6 +78,13 @@ jobs:
       - name: Definir variável de versão
         run: echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
 
+      - name: Criar e enviar tag sem o 'v'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ env.VERSION }}
+          git push origin ${{ env.VERSION }}
+
       - name: Baixar o JAR compilado
         uses: actions/download-artifact@v4
         with:
@@ -101,7 +108,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
-          name: "v${{ env.VERSION }}"
+          name: ${{ env.VERSION }}
           files: build/libs/*.jar
           body: |
             Versão ${{ env.VERSION }} do TadeuBooter
@@ -110,3 +117,4 @@ jobs:
             ${{ steps.commits.outputs.commit_list }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
