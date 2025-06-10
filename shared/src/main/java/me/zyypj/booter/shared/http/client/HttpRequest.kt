@@ -62,7 +62,9 @@ class HttpRequest<T> @JvmOverloads constructor(
                 requestMethod = "GET"
                 setRequestProperty("requireSSL", requireSSL.toString())
                 connectTimeout = effectiveTimeout
-                contentType?.takeIf { it.isNotEmpty() }?.let { setRequestProperty("Content-Type", it) }
+                contentType?.takeIf { it.isNotEmpty() }?.let {
+                    setRequestProperty("Content-Type", it)
+                }
                 connect()
             }
 
@@ -75,6 +77,9 @@ class HttpRequest<T> @JvmOverloads constructor(
         } catch (ex: RuntimeException) {
             exception = ex
             false
+        } finally {
+            // Ensure the connection is always released
+            requestConnection?.disconnect()
         }
     }
 
