@@ -1,26 +1,27 @@
-## 📖 Documentação
-Para instruções detalhadas sobre como adicionar o **TadeuBooter** ao seu projeto, configurar dependências e realizar o **relocate**, acesse a [wiki oficial](https://github.com/zyypj/tadeuBooter/wiki).
+## 📖 Documentation
+For detailed instructions on how to add **TadeuBooter** to your project, set up dependencies, and perform the **relocate**, visit the [official wiki](https://github.com/zyypj/tadeuBooter/wiki).
 
-## Contribuições e Feedback
-Contribuições são bem-vindas! Se encontrar problemas ou tiver sugestões de melhorias, sinta-se à vontade para abrir uma [issue](https://github.com/zyypj/tadeuBooter/issues) ou enviar um [pull request](https://github.com/zyypj/tadeuBooter/pulls).
+## Contributions & Feedback
+Contributions are welcome! If you encounter any issues or have suggestions for improvements, feel free to open an [issue](https://github.com/zyypj/tadeuBooter/issues) or submit a [pull request](https://github.com/zyypj/tadeuBooter/pulls).
 
-## Estilo de Código e Formatação
-Este projeto utiliza [Spotless](https://github.com/diffplug/spotless) para manter a consistência do código.
+## Code Style & Formatting
+This project uses [Spotless](https://github.com/diffplug/spotless) to maintain code consistency.
 
-Para verificar se seu código está formatado corretamente:
+To check if your code is formatted correctly:
 ```bash
 ./gradlew spotlessCheck
-```
+````
 
-Para aplicar a formatação automaticamente:
+To apply the formatting automatically:
+
 ```bash
 ./gradlew spotlessApply
 ```
 
-## Agradecimentos
+## Acknowledgements
 
-Obrigado ao [**syncwrld**](https://github.com/syncwrld) pela disponibilidade da base do booter e de alguns códigos.
+Thanks to [**syncwrld**](https://github.com/syncwrld) for providing the booter base and some of the code.
 
 ---
 
-# Lembrando, eu sou o Tadeu :D
+# Remember, I am Tadeu \:D
